@@ -47,18 +47,28 @@ export const creepFC = () => {
             FIND_DROPPED_RESOURCES,
             {
                 filter: (r: Resource) =>
-                    r.resourceType == RESOURCE_ENERGY && r.amount >= 50,
+                    r.resourceType == RESOURCE_ENERGY &&
+                    r.amount >= 50 &&
+                    r.pos.getOpenPositions().length,
             }
         );
 
-        if (droppedEnergy) {
-            if (this.pos.isNearTo(droppedEnergy)) {
-                this.withdraw(droppedEnergy);
+        const ruinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
+            filter: (r: Ruin) =>
+                r.store[RESOURCE_ENERGY] >= 50 &&
+                r.pos.getOpenPositions().length,
+        });
+        if (droppedEnergy || ruinEnergy) {
+            const toWithdraw = droppedEnergy || ruinEnergy;
+
+            if (this.pos.isNearTo(toWithdraw)) {
+                this.withdraw(toWithdraw, RESOURCE_ENERGY);
             } else {
-                this.moveTo(droppedEnergy, {
+                this.moveTo(toWithdraw, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
+            return;
         }
 
         if (
