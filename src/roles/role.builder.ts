@@ -1,4 +1,4 @@
-import { IS_FIXING } from "../settings";
+import settings from "../settings";
 import { IBuilder } from "../types/Builder";
 
 const roleBuilder = {
@@ -23,7 +23,7 @@ const roleBuilder = {
                 }
             );
 
-            if (closestDamagedStructure && IS_FIXING) {
+            if (closestDamagedStructure && settings.global.IS_FIXING) {
                 if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(closestDamagedStructure, {
                         visualizePathStyle: { stroke: "#ffffff" },

@@ -1,10 +1,18 @@
-export const IS_FIXING = true;
-export const MAX_REPAIRS = 5;
-export const MAX_WARRIORS = 2;
-export const MAX_HARVESTERS = 5;
-export const MAX_ARCHERS = 3;
-export const MAX_BUILDERS = 5;
-export const MAX_UPGRADERS = 3;
+const conf = {
+    global: {
+        IS_FIXING: true,
+    },
+    creeps: {
+        MAX_REPAIRS: 5,
+        MAX_WARRIORS: 2,
+        MAX_HARVESTERS: 5,
+        MAX_ARCHERS: 3,
+        MAX_BUILDERS: 5,
+        MAX_UPGRADERS: 3,
 
-export const MIN_HARVESTERS = 3;
-export const MIN_UPGRADERS = 1;
+        MIN_HARVESTERS: 3,
+        MIN_UPGRADERS: 1,
+    },
+};
+
+export default conf;
