@@ -3379,7 +3379,7 @@ interface Memory {
 }
 
 interface CreepMemory {
-    role?: string;
+    role: string;
 }
 interface FlagMemory {}
 interface PowerCreepMemory {}

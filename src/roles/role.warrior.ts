@@ -2,7 +2,7 @@ const roleWarrior = {
     /** @param {Creep} creep **/
     run: function (creep: Creep) {
         const closestHostile = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-
+        console.log("test");
         if (closestHostile) {
             creep.say("Attack");
             if (creep.attack(closestHostile) == ERR_NOT_IN_RANGE) {
