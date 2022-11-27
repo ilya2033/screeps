@@ -14,10 +14,23 @@ const roleArcher = {
             creep.moveToSpawnPoint();
         }
     },
-    spawn: (spawn) =>
-        spawn.spawnCreep([RANGED_ATTACK, MOVE], `Archer${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [RANGED_ATTACK, MOVE];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [
+                    RANGED_ATTACK,
+                    RANGED_ATTACK,
+                    RANGED_ATTACK,
+                    MOVE,
+                    MOVE,
+                ];
+                break;
+        }
+        spawn.spawnCreep(setup, `Archer${Game.time}`, {
             memory: { role: "archer" },
-        }),
+        });
+    },
 };
 
 export default roleArcher;

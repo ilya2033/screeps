@@ -16,10 +16,17 @@ const roleWarrior = {
         }
     },
     /** @param {StructureSpawn} spawn **/
-    spawn: (spawn) =>
-        spawn.spawnCreep([ATTACK, MOVE], `Warrior${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [WORK, MOVE];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [WORK, WORK, WORK, MOVE, MOVE];
+                break;
+        }
+        spawn.spawnCreep(setup, `Warrior${Game.time}`, {
             memory: { role: "warrior" },
-        }),
+        });
+    },
 };
 
 export default roleWarrior;

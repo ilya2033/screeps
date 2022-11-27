@@ -32,8 +32,14 @@ const roleHarvester = {
         }
     },
     /** @param {StructureSpawn} spawn **/
-    spawn: (spawn) => {
-        spawn.spawnCreep([WORK, MOVE, CARRY], `Harvester${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [WORK, MOVE, CARRY];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                break;
+        }
+        spawn.spawnCreep(setup, `Harvester${Game.time}`, {
             memory: { role: "harvester" },
         });
     },

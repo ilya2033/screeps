@@ -31,10 +31,17 @@ const roleBuilder = {
         }
     },
     /** @param {StructureSpawn} spawn **/
-    spawn: (spawn) =>
-        spawn.spawnCreep([WORK, MOVE, CARRY], `Builder${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [WORK, MOVE, CARRY];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                break;
+        }
+        spawn.spawnCreep(setup, `Builder${Game.time}`, {
             memory: { role: "builder" },
-        }),
+        });
+    },
 };
 
 export default roleBuilder;

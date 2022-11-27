@@ -94,6 +94,8 @@ const creepsSpawnScript = function () {
                 }
             }
         }
+
+        if (builders.length < settings.creeps.MIN_BUILDERS) return;
         if (
             repairs.length < damagedSructures.length / 7 &&
             settings.global.IS_FIXING &&

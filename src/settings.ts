@@ -10,8 +10,9 @@ const conf = {
         MAX_BUILDERS: 5,
         MAX_UPGRADERS: 3,
 
-        MIN_HARVESTERS: 3,
+        MIN_HARVESTERS: 5,
         MIN_UPGRADERS: 1,
+        MIN_BUILDERS: 1,
     },
 };
 

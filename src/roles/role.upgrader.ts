@@ -26,10 +26,17 @@ const roleUpgrader = {
         }
     },
     /** @param {StructureSpawn} spawn **/
-    spawn: (spawn) =>
-        spawn.spawnCreep([WORK, MOVE, CARRY], `Upgrader${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [WORK, MOVE, CARRY];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                break;
+        }
+        spawn.spawnCreep(setup, `Upgrader${Game.time}`, {
             memory: { role: "upgrader" },
-        }),
+        });
+    },
 };
 
 export default roleUpgrader;

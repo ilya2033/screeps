@@ -18,7 +18,8 @@ const roleRepair = {
                 FIND_STRUCTURES,
                 {
                     filter: (structure) =>
-                        structure.hits < (structure.hitsMax / 3) * 2 &&
+                        structure.hitsMax - structure.hits >
+                            creep.store.getCapacity() &&
                         structure.structureType !== STRUCTURE_WALL,
                 }
             );
@@ -37,10 +38,17 @@ const roleRepair = {
             creep.harvestEnergy();
         }
     },
-    spawn: (spawn) =>
-        spawn.spawnCreep([WORK, MOVE, CARRY], `Repair${Game.time}`, {
+    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+        let setup = [WORK, MOVE, CARRY];
+        switch (energyCapacityAvailable) {
+            case 550:
+                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                break;
+        }
+        spawn.spawnCreep(setup, `Repair${Game.time}`, {
             memory: { role: "repair" },
-        }),
+        });
+    },
 };
 
 export default roleRepair;
