@@ -28,6 +28,7 @@ const roleRepair = {
                     });
                 }
             } else {
+                creep.say("😴 sleep");
                 creep.moveToSpawnPoint();
             }
         } else {

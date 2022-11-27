@@ -13,7 +13,16 @@ import roleWarrior from "../roles/role.warrior";
 import roleBuilder from "../roles/role.builder";
 import roleArcher from "../roles/role.archer";
 import roleRepair from "../roles/role.repair";
-import { IS_FIXING } from "../settings";
+import {
+    IS_FIXING,
+    MAX_ARCHERS,
+    MAX_BUILDERS,
+    MAX_HARVESTERS,
+    MAX_REPAIRS,
+    MAX_WARRIORS,
+    MIN_HARVESTERS,
+    MIN_UPGRADERS,
+} from "../settings";
 
 const creepsSpawnScript = function () {
     for (let creepName in Memory.creeps) {
@@ -49,7 +58,7 @@ const creepsSpawnScript = function () {
             (creep) => creep.memory.role === "repair"
         );
 
-        if (harvesters.length < 5) {
+        if (harvesters.length < MAX_HARVESTERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
                     roleHarvester.spawn(spawn);
@@ -57,19 +66,19 @@ const creepsSpawnScript = function () {
             }
         }
 
-        if (harvesters.length < 3) return;
+        if (harvesters.length < MIN_HARVESTERS) return;
 
-        if (upgraders.length < 3) {
+        if (upgraders.length < MIN_UPGRADERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
                     roleUpgrader.spawn(spawn);
-
-                    break;
                 }
             }
         }
 
-        if (warriors.length < 2) {
+        if (upgraders.length < MIN_UPGRADERS) return;
+
+        if (warriors.length < MAX_WARRIORS) {
             for (const spawn of Object.values(spawns)) {
                 const safeMode = spawn.room.controller?.safeMode;
                 if (spawn.isActive() && !spawn.spawning && !safeMode) {
@@ -78,7 +87,7 @@ const creepsSpawnScript = function () {
             }
         }
 
-        if (archers.length < 3) {
+        if (archers.length < MAX_ARCHERS) {
             for (const spawn of Object.values(spawns)) {
                 const safeMode = spawn.room.controller?.safeMode;
                 if (spawn.isActive() && !spawn.spawning && !safeMode) {
@@ -87,14 +96,18 @@ const creepsSpawnScript = function () {
             }
         }
 
-        if (builders.length < 5) {
+        if (builders.length < MAX_BUILDERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
                     roleBuilder.spawn(spawn);
                 }
             }
         }
-        if (repairs.length < damagedSructures.length / 7 && IS_FIXING) {
+        if (
+            repairs.length < damagedSructures.length / 7 &&
+            IS_FIXING &&
+            repairs.length < MAX_REPAIRS
+        ) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
                     roleRepair.spawn(spawn);

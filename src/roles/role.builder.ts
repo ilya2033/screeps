@@ -38,6 +38,7 @@ const roleBuilder = {
                     });
                 }
             } else {
+                creep.say("😴 sleep");
                 creep.moveToSpawnPoint();
             }
         } else {

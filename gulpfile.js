@@ -1,6 +1,5 @@
 let gulp = require("gulp");
 let screeps = require("gulp-screeps");
-let flattenRequires = require("gulp-flatten-requires");
 let flattenImports = require("gulp-flatten-imports");
 let credentials = require("./credentials.js");
 let typescript = require("gulp-typescript");
@@ -38,4 +37,4 @@ gulp.task("clean", function () {
     return gulp.src("./dist", { read: false }).pipe(clean());
 });
 
-exports.default = gulp.series("flatten-folders", "screeps");
+exports.default = gulp.series("clean", "flatten-folders", "screeps");
