@@ -1,0 +1,15 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "module": "ES6",
+        "target": "ES2019",
+        "outDir": "build",
+        "rootDir": "src",
+        "watch": true,
+        "typeRoots": ["src/@types", "node_modules/@types"]
+    },
+
+    "include": ["src/*"],
+    "exclude": ["node_modules/screeps/@types/*"]
+}
