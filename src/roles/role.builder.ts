@@ -16,21 +16,6 @@ const roleBuilder = {
         if (creep.memory.building) {
             const buildTargets = creep.room.find(FIND_CONSTRUCTION_SITES);
 
-            const closestDamagedStructure = creep.pos.findClosestByRange(
-                FIND_STRUCTURES,
-                {
-                    filter: (structure) => structure.hits < structure.hitsMax,
-                }
-            );
-
-            if (closestDamagedStructure && settings.global.IS_FIXING) {
-                if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(closestDamagedStructure, {
-                        visualizePathStyle: { stroke: "#ffffff" },
-                    });
-                }
-            }
-
             if (buildTargets.length) {
                 if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(buildTargets[0], {
