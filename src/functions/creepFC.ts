@@ -99,4 +99,15 @@ export const creepFC = () => {
 
         this.moveTo(flag);
     };
+
+    Creep.prototype.moveToDefendPoint = function (room) {
+        let flag: Flag;
+        if (room) {
+            flag = Game.flags[`${room}-defendPoint`];
+        } else {
+            flag = Game.flags[`${this.room}-defendPoint`];
+        }
+
+        this.moveTo(flag);
+    };
 };

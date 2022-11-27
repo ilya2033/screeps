@@ -10,7 +10,7 @@ const roleArcher = {
             }
         } else {
             creep.say("😴 sleep");
-            creep.moveToSpawnPoint();
+            creep.moveToDefendPoint();
         }
     },
     spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {

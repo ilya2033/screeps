@@ -22,6 +22,11 @@ const roleBuilder = {
                     });
                 }
             } else {
+                if (
+                    creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])
+                ) {
+                    return;
+                }
                 creep.say("😴 sleep");
                 creep.moveToSpawnPoint();
             }

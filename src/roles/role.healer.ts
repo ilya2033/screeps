@@ -11,8 +11,11 @@ const roleHealer = {
                 });
             }
         } else {
+            if (creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])) {
+                return;
+            }
             creep.say("😴 sleep");
-            creep.moveToSpawnPoint();
+            creep.moveToDefendPoint();
         }
     },
     spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {

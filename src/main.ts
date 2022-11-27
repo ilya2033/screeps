@@ -19,6 +19,8 @@ runAllFC();
 export const loop = () => {
     creepsSpawnScript();
 
+    const hostiles = Object.values(Game.creeps).filter((creep) => !creep.my);
+
     const harvesters: IHarvester[] = Object.values(Game.creeps).filter(
         (creep) => creep.memory.role === "harvester"
     );
@@ -47,7 +49,10 @@ export const loop = () => {
     builders.forEach((creep) => roleBuilder.run(creep));
     upgraders.forEach((creep) => roleUpgrader.run(creep));
     repairs.forEach((creep) => roleRepair.run(creep));
-    warriors.forEach((creep) => roleWarrior.run(creep));
-    archers.forEach((creep) => roleArcher.run(creep));
-    healers.forEach((creep) => roleHealer.run(creep));
+
+    if (hostiles.length) {
+        warriors.forEach((creep) => roleWarrior.run(creep));
+        archers.forEach((creep) => roleArcher.run(creep));
+        healers.forEach((creep) => roleHealer.run(creep));
+    }
 };

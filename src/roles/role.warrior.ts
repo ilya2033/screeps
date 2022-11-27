@@ -12,7 +12,7 @@ const roleWarrior = {
             }
         } else {
             creep.say("😴 sleep");
-            creep.moveToSpawnPoint();
+            creep.moveToDefendPoint();
         }
     },
     /** @param {StructureSpawn} spawn **/
