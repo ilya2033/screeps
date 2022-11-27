@@ -12,6 +12,7 @@ import { IBuilder } from "./types/Builder";
 import { IHarvester } from "./types/Harvester";
 import { IRepair } from "./types/Repair";
 import roleRepair from "./roles/role.repair";
+import roleHealer from "./roles/role.healer";
 
 runAllFC();
 
@@ -38,10 +39,15 @@ export const loop = () => {
         (creep) => creep.memory.role === "repair"
     );
 
+    const healers: IRepair[] = Object.values(Game.creeps).filter(
+        (creep) => creep.memory.role === "healer"
+    );
+
     harvesters.forEach((creep) => roleHarvester.run(creep));
     builders.forEach((creep) => roleBuilder.run(creep));
     upgraders.forEach((creep) => roleUpgrader.run(creep));
     repairs.forEach((creep) => roleRepair.run(creep));
     warriors.forEach((creep) => roleWarrior.run(creep));
     archers.forEach((creep) => roleArcher.run(creep));
+    archers.forEach((creep) => roleHealer.run(creep));
 };

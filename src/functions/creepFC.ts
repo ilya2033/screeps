@@ -43,6 +43,24 @@ export const creepFC = () => {
         let storedSource = <Source | null>(
             Game.getObjectById(this.memory.sourceId)
         );
+        const droppedEnergy = this.pos.findClosestByPath(
+            FIND_DROPPED_RESOURCES,
+            {
+                filter: (r: Resource) =>
+                    r.resourceType == RESOURCE_ENERGY && r.amount >= 50,
+            }
+        );
+
+        if (droppedEnergy) {
+            if (this.pos.isNearTo(droppedEnergy)) {
+                this.withdraw(droppedEnergy);
+            } else {
+                this.moveTo(droppedEnergy, {
+                    visualizePathStyle: { stroke: "#ffaa00" },
+                });
+            }
+        }
+
         if (
             !storedSource ||
             (!storedSource.pos.getOpenPositions().length &&

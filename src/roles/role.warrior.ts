@@ -2,7 +2,7 @@ const roleWarrior = {
     /** @param {Creep} creep **/
     run: function (creep: Creep) {
         const closestHostile = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
-        console.log("test");
+
         if (closestHostile) {
             creep.say("Attack");
             if (creep.attack(closestHostile) == ERR_NOT_IN_RANGE) {
@@ -17,19 +17,10 @@ const roleWarrior = {
     },
     /** @param {StructureSpawn} spawn **/
     spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
-        let setup = [ATTACK, MOVE];
+        let setup = [ATTACK, TOUGH, MOVE];
         switch (energyCapacityAvailable) {
             case 550:
-                setup = [
-                    ATTACK,
-                    ATTACK,
-                    ATTACK,
-                    ATTACK,
-                    ATTACK,
-                    MOVE,
-                    MOVE,
-                    MOVE,
-                ];
+                setup = [ATTACK, ATTACK, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE];
                 break;
         }
         spawn.spawnCreep(setup, `Warrior${Game.time}`, {

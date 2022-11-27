@@ -13,6 +13,7 @@ import roleWarrior from "../roles/role.warrior";
 import roleBuilder from "../roles/role.builder";
 import roleArcher from "../roles/role.archer";
 import roleRepair from "../roles/role.repair";
+import roleHealer from "../roles/role.healer";
 import settings from "../settings";
 
 const creepsSpawnScript = function () {
@@ -50,6 +51,10 @@ const creepsSpawnScript = function () {
             (creep) => creep.memory.role === "repair"
         );
 
+        const healers = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "healer"
+        );
+
         if (harvesters.length < settings.creeps.MAX_HARVESTERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
@@ -84,6 +89,15 @@ const creepsSpawnScript = function () {
                 const safeMode = spawn.room.controller?.safeMode;
                 if (spawn.isActive() && !spawn.spawning && !safeMode) {
                     roleArcher.spawn(spawn, energyCapacityAvailable);
+                }
+            }
+        }
+
+        if (healers.length < settings.creeps.MAX_HEALERS) {
+            for (const spawn of Object.values(spawns)) {
+                const safeMode = spawn.room.controller?.safeMode;
+                if (spawn.isActive() && !spawn.spawning && !safeMode) {
+                    roleHealer.spawn(spawn, energyCapacityAvailable);
                 }
             }
         }

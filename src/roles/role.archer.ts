@@ -3,7 +3,7 @@ const roleArcher = {
         const closestHostile = creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
         if (closestHostile) {
             creep.say("Attack");
-            if (creep.attack(closestHostile) == ERR_NOT_IN_RANGE) {
+            if (creep.rangedAttack(closestHostile) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(closestHostile, {
                     visualizePathStyle: { stroke: "#FF0000" },
                 });
