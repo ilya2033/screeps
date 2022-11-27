@@ -18,7 +18,7 @@ const roleRepair = {
                 FIND_STRUCTURES,
                 {
                     filter: (structure) =>
-                        structure.hits < structure.hitsMax &&
+                        structure.hits < (structure.hitsMax / 3) * 2 &&
                         structure.structureType !== STRUCTURE_WALL,
                 }
             );
