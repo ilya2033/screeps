@@ -36,7 +36,7 @@ const roleHarvester = {
         let setup = [WORK, MOVE, CARRY];
         switch (energyCapacityAvailable) {
             case 550:
-                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                setup = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
                 break;
         }
         spawn.spawnCreep(setup, `Harvester${Game.time}`, {

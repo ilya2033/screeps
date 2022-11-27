@@ -17,10 +17,19 @@ const roleWarrior = {
     },
     /** @param {StructureSpawn} spawn **/
     spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
-        let setup = [WORK, MOVE];
+        let setup = [ATTACK, MOVE];
         switch (energyCapacityAvailable) {
             case 550:
-                setup = [WORK, WORK, WORK, MOVE, MOVE];
+                setup = [
+                    ATTACK,
+                    ATTACK,
+                    ATTACK,
+                    ATTACK,
+                    ATTACK,
+                    MOVE,
+                    MOVE,
+                    MOVE,
+                ];
                 break;
         }
         spawn.spawnCreep(setup, `Warrior${Game.time}`, {

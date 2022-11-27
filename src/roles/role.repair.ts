@@ -42,7 +42,7 @@ const roleRepair = {
         let setup = [WORK, MOVE, CARRY];
         switch (energyCapacityAvailable) {
             case 550:
-                setup = [WORK, WORK, WORK, MOVE, MOVE, CARRY];
+                setup = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
                 break;
         }
         spawn.spawnCreep(setup, `Repair${Game.time}`, {

@@ -1,5 +1,5 @@
 {
-    "compileOnSave": false,
+    "compileOnSave": true,
     "compilerOptions": {
         "esModuleInterop": true,
         "module": "ES6",
@@ -11,5 +11,5 @@
     },
 
     "include": ["src/*"],
-    "exclude": ["node_modules/screeps/@types/*"]
+    "exclude": ["node_modules/screeps/@types"]
 }
