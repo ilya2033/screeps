@@ -1,7 +1,7 @@
 let gulp = require("gulp");
 let screeps = require("gulp-screeps");
 let flattenImports = require("gulp-flatten-imports");
-let credentials = require("./credentials.js");
+let credentials = require("./.credentials.js");
 let typescript = require("gulp-typescript");
 let clean = require("gulp-clean");
 
