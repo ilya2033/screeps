@@ -49,5 +49,5 @@ export const loop = () => {
     repairs.forEach((creep) => roleRepair.run(creep));
     warriors.forEach((creep) => roleWarrior.run(creep));
     archers.forEach((creep) => roleArcher.run(creep));
-    archers.forEach((creep) => roleHealer.run(creep));
+    healers.forEach((creep) => roleHealer.run(creep));
 };
