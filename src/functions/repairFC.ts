@@ -1,9 +1,6 @@
 import { IRepair } from "../types/Repair";
 
 export const repairFC = () => {
-    const Repair: IRepair = {
-        prototype: Creep.prototype,
-    };
     Creep.prototype.findEnergySource = function () {
         const sources: Source[] = this.room.find(FIND_SOURCES);
         if (sources.length) {

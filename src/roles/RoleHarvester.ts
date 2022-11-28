@@ -33,6 +33,10 @@ const RoleHarvester = {
                         });
                     }
                 }
+
+                if (!selectedTarget && creep.store.getFreeCapacity() === 0) {
+                    this.sleep(creep);
+                }
             }
         },
     },

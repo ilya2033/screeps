@@ -16,17 +16,20 @@ export const roomPositionFC = () => {
         return positions;
     };
 
-    RoomPosition.prototype.getOpenPositions = function () {
-        const nearbyPositions: RoomPosition = this.getNearbyPositions();
-
+    RoomPosition.prototype.getWalkablePositions = function () {
+        const nearbyPositions: RoomPosition[] = this.getNearbyPositions();
         const terrain = Game.map.getRoomTerrain(this.roomName);
-        const walkablePositions = Object.values(nearbyPositions).filter(
-            (pos) => terrain.get(pos.x, pos.y) !== TERRAIN_MASK_WALL
-        );
+        const walkablePositions: RoomPosition[] = Object.values(
+            nearbyPositions
+        ).filter((pos) => terrain.get(pos.x, pos.y) !== TERRAIN_MASK_WALL);
 
-        const freePositions = Object.values(walkablePositions).filter(
-            (pos) => !pos.lookFor(LOOK_CREEPS).length
-        );
+        return walkablePositions;
+    };
+
+    RoomPosition.prototype.getOpenPositions = function () {
+        const freePositions: RoomPosition[] = Object.values(
+            <RoomPosition[]>this.getWalkablePositions()
+        ).filter((pos: RoomPosition) => !pos.lookFor(LOOK_CREEPS).length);
         return freePositions;
     };
 };

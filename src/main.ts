@@ -1,6 +1,7 @@
 import RoleHarvester from "./roles/RoleHarvester";
-import roleWarrior from "./roles/role.warrior";
-import roleArcher from "./roles/role.archer";
+import RoleWarrior from "./roles/RoleWarrior";
+import RoleArcher from "./roles/RoleArcher";
+import RoleHealer from "./roles/RoleHealer";
 import RoleBuilderr from "./roles/RoleBuilder";
 import { creepsSpawnScript } from "./scripts/creeps.spawn";
 import { runAllFC } from "./functions/runAllFC";
@@ -11,7 +12,7 @@ import { IBuilder } from "./types/Builder";
 import { IHarvester } from "./types/Harvester";
 import { IRepair } from "./types/Repair";
 import RoleRepair from "./roles/RoleRepair";
-import roleHealer from "./roles/role.healer";
+
 import RoleUpgrader from "roles/RoleUpgrader";
 
 runAllFC();
@@ -50,7 +51,7 @@ export const loop = () => {
     upgraders.forEach((creep) => RoleUpgrader.run(creep));
     repairs.forEach((creep) => RoleRepair.run(creep));
 
-    warriors.forEach((creep) => roleWarrior.run(creep));
-    archers.forEach((creep) => roleArcher.run(creep));
-    healers.forEach((creep) => roleHealer.run(creep));
+    warriors.forEach((creep) => RoleWarrior.run(creep));
+    archers.forEach((creep) => RoleArcher.run(creep));
+    healers.forEach((creep) => RoleHealer.run(creep));
 };

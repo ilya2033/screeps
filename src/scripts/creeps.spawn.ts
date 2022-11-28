@@ -6,13 +6,14 @@
  * var mod = require('creeps.spawn');
  * mod.thing == 'a thing'; // true
  */
-
+import RoleWarrior from "../roles/RoleWarrior";
+import RoleArcher from "../roles/RoleArcher";
+import RoleHealer from "../roles/RoleHealer";
 import RoleUpgrader from "../roles/RoleUpgrader";
 import RoleHarvester from "../roles/RoleHarvester";
-import roleWarrior from "../roles/role.warrior";
+
 import RoleBuilderr from "../roles/RoleBuilder";
-import roleArcher from "../roles/role.archer";
-import roleHealer from "../roles/role.healer";
+
 import settings from "../settings";
 import RoleRepair from "../roles/RoleRepair";
 import { IHarvester } from "../types/Harvester";
@@ -44,6 +45,11 @@ const creepsSpawnScript = function () {
         const creeps = room.find(FIND_MY_CREEPS);
         const spawns = room.find(FIND_MY_SPAWNS);
         const energyCapacityAvailable = room.energyCapacityAvailable;
+        const sources = Object.values(room.find(FIND_SOURCES));
+        const sourcesWalkablePlaces = sources.reduce(
+            (prev, s: Source) => prev + s.pos.getWalkablePositions().length,
+            0
+        );
         const damagedSructures = room.find(FIND_STRUCTURES, {
             filter: (structure) =>
                 structure.hits < structure.hitsMax &&
@@ -76,13 +82,10 @@ const creepsSpawnScript = function () {
             (creep) => creep.memory.role === "healer"
         );
 
-        console.log(
-            myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS
-        );
-
         switch (true) {
-            case myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS:
-                console.log("test");
+            case myCreeps.harvesters.length <
+                Math.ceil(sourcesWalkablePlaces / 2) &&
+                myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleHarvester.spawn(spawn, energyCapacityAvailable);
@@ -90,7 +93,9 @@ const creepsSpawnScript = function () {
                     }
                 }
                 break;
-            case myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS:
+            case myCreeps.upgraders.length <
+                Math.ceil(sourcesWalkablePlaces / 2) &&
+                myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleUpgrader.spawn(spawn, energyCapacityAvailable);
@@ -102,7 +107,7 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     const safeMode = spawn.room.controller?.safeMode;
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        roleWarrior.spawn(spawn, energyCapacityAvailable);
+                        RoleWarrior.spawn(spawn, energyCapacityAvailable);
                         break;
                     }
                 }
@@ -111,7 +116,7 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     const safeMode = spawn.room.controller?.safeMode;
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        roleArcher.spawn(spawn, energyCapacityAvailable);
+                        RoleArcher.spawn(spawn, energyCapacityAvailable);
                         break;
                     }
                 }
@@ -121,13 +126,15 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     const safeMode = spawn.room.controller?.safeMode;
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        roleHealer.spawn(spawn, energyCapacityAvailable);
+                        RoleHealer.spawn(spawn, energyCapacityAvailable);
                         break;
                     }
                 }
                 break;
 
-            case myCreeps.builders.length < settings.creeps.MAX_BUILDERS:
+            case myCreeps.builders.length <
+                Math.ceil(sourcesWalkablePlaces / 2) &&
+                myCreeps.builders.length < settings.creeps.MAX_BUILDERS:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleBuilderr.spawn(spawn, energyCapacityAvailable);

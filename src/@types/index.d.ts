@@ -4067,6 +4067,7 @@ interface PowerEffect {
 interface RoomPosition {
     getOpenPositions: () => RoomPosition[];
     getNearbyPositions: () => RoomPosition[];
+    getWalkablePositions: () => RoomPosition[];
     readonly prototype: RoomPosition;
 
     /**
