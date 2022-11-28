@@ -7,10 +7,10 @@
  * mod.thing == 'a thing'; // true
  */
 
-import roleUpgrader from "../roles/role.upgrader";
-import roleHarvester from "../roles/role.harvester";
+import RoleUpgrader from "../roles/RoleUpgrader";
+import RoleHarvester from "../roles/RoleHarvester";
 import roleWarrior from "../roles/role.warrior";
-import roleBuilder from "../roles/role.builder";
+import RoleBuilderr from "../roles/RoleBuilder";
 import roleArcher from "../roles/role.archer";
 import roleHealer from "../roles/role.healer";
 import settings from "../settings";
@@ -60,7 +60,7 @@ const creepsSpawnScript = function () {
         if (harvesters.length < settings.creeps.MAX_HARVESTERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
-                    roleHarvester.spawn(spawn, energyCapacityAvailable);
+                    RoleHarvester.spawn(spawn, energyCapacityAvailable);
                 }
             }
         }
@@ -70,7 +70,7 @@ const creepsSpawnScript = function () {
         if (upgraders.length < settings.creeps.MAX_UPGRADERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
-                    roleUpgrader.spawn(spawn, energyCapacityAvailable);
+                    RoleUpgrader.spawn(spawn, energyCapacityAvailable);
                 }
             }
         }
@@ -107,14 +107,14 @@ const creepsSpawnScript = function () {
         if (builders.length < settings.creeps.MAX_BUILDERS) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
-                    roleBuilder.spawn(spawn, energyCapacityAvailable);
+                    RoleBuilderr.spawn(spawn, energyCapacityAvailable);
                 }
             }
         }
 
         if (builders.length < settings.creeps.MIN_BUILDERS) return;
         if (
-            repairs.length < damagedSructures.length / 7 &&
+            repairs.length < damagedSructures.length / 3 &&
             settings.global.IS_FIXING &&
             repairs.length < settings.creeps.MAX_REPAIRS
         ) {
