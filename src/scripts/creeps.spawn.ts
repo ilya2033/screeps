@@ -15,6 +15,23 @@ import roleArcher from "../roles/role.archer";
 import roleHealer from "../roles/role.healer";
 import settings from "../settings";
 import RoleRepair from "../roles/RoleRepair";
+import { IHarvester } from "../types/Harvester";
+import { IBuilder } from "../types/Builder";
+import { IRepair } from "../types/Repair";
+import { IUpgrader } from "../types/Upgrader";
+import { IWarrior } from "../types/Warrior";
+import { IArcher } from "../types/Archer";
+import { IHealer } from "../types/Healer";
+
+interface MyCreeps {
+    harvesters?: IHarvester[];
+    builders?: IBuilder[];
+    repairs?: IRepair[];
+    upgraders?: IUpgrader[];
+    warriors?: IWarrior[];
+    archers?: IArcher[];
+    healers?: IHealer[];
+}
 
 const creepsSpawnScript = function () {
     for (let creepName in Memory.creeps) {
@@ -33,96 +50,102 @@ const creepsSpawnScript = function () {
                 structure.structureType !== STRUCTURE_WALL,
         });
 
-        const harvesters = Object.values(creeps).filter(
+        let myCreeps: MyCreeps = {};
+
+        myCreeps.harvesters = Object.values(creeps).filter(
             (creep) => creep.memory.role === "harvester"
         );
-        const builders = Object.values(creeps).filter(
+        myCreeps.builders = Object.values(creeps).filter(
             (creep) => creep.memory.role === "builder"
         );
-        const upgraders = Object.values(creeps).filter(
+        myCreeps.upgraders = Object.values(creeps).filter(
             (creep) => creep.memory.role === "upgrader"
         );
-        const warriors = Object.values(creeps).filter(
+        myCreeps.warriors = Object.values(creeps).filter(
             (creep) => creep.memory.role === "warrior"
         );
-        const archers = Object.values(creeps).filter(
+        myCreeps.archers = Object.values(creeps).filter(
             (creep) => creep.memory.role === "archer"
         );
 
-        const repairs = Object.values(creeps).filter(
+        myCreeps.repairs = Object.values(creeps).filter(
             (creep) => creep.memory.role === "repair"
         );
 
-        const healers = Object.values(creeps).filter(
+        myCreeps.healers = Object.values(creeps).filter(
             (creep) => creep.memory.role === "healer"
         );
 
-        if (harvesters.length < settings.creeps.MAX_HARVESTERS) {
-            for (const spawn of Object.values(spawns)) {
-                if (spawn.isActive() && !spawn.spawning) {
-                    RoleHarvester.spawn(spawn, energyCapacityAvailable);
+        console.log(
+            myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS
+        );
+
+        switch (true) {
+            case myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS:
+                console.log("test");
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleHarvester.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
-
-        if (harvesters.length < settings.creeps.MIN_HARVESTERS) return;
-
-        if (upgraders.length < settings.creeps.MAX_UPGRADERS) {
-            for (const spawn of Object.values(spawns)) {
-                if (spawn.isActive() && !spawn.spawning) {
-                    RoleUpgrader.spawn(spawn, energyCapacityAvailable);
+                break;
+            case myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleUpgrader.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
-
-        if (upgraders.length < settings.creeps.MIN_UPGRADERS) return;
-
-        if (warriors.length < settings.creeps.MAX_WARRIORS) {
-            for (const spawn of Object.values(spawns)) {
-                const safeMode = spawn.room.controller?.safeMode;
-                if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                    roleWarrior.spawn(spawn, energyCapacityAvailable);
+                break;
+            case myCreeps.warriors.length < settings.creeps.MAX_WARRIORS:
+                for (const spawn of Object.values(spawns)) {
+                    const safeMode = spawn.room.controller?.safeMode;
+                    if (spawn.isActive() && !spawn.spawning && !safeMode) {
+                        roleWarrior.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
-
-        if (archers.length < settings.creeps.MAX_ARCHERS) {
-            for (const spawn of Object.values(spawns)) {
-                const safeMode = spawn.room.controller?.safeMode;
-                if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                    roleArcher.spawn(spawn, energyCapacityAvailable);
+                break;
+            case myCreeps.archers.length < settings.creeps.MAX_ARCHERS:
+                for (const spawn of Object.values(spawns)) {
+                    const safeMode = spawn.room.controller?.safeMode;
+                    if (spawn.isActive() && !spawn.spawning && !safeMode) {
+                        roleArcher.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
+                break;
 
-        if (healers.length < settings.creeps.MAX_HEALERS) {
-            for (const spawn of Object.values(spawns)) {
-                const safeMode = spawn.room.controller?.safeMode;
-                if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                    roleHealer.spawn(spawn, energyCapacityAvailable);
+            case myCreeps.healers.length < settings.creeps.MAX_HEALERS:
+                for (const spawn of Object.values(spawns)) {
+                    const safeMode = spawn.room.controller?.safeMode;
+                    if (spawn.isActive() && !spawn.spawning && !safeMode) {
+                        roleHealer.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
+                break;
 
-        if (builders.length < settings.creeps.MAX_BUILDERS) {
-            for (const spawn of Object.values(spawns)) {
-                if (spawn.isActive() && !spawn.spawning) {
-                    RoleBuilderr.spawn(spawn, energyCapacityAvailable);
+            case myCreeps.builders.length < settings.creeps.MAX_BUILDERS:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleBuilderr.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
-        }
+                break;
 
-        if (builders.length < settings.creeps.MIN_BUILDERS) return;
-        if (
-            repairs.length < damagedSructures.length / 3 &&
-            settings.global.IS_FIXING &&
-            repairs.length < settings.creeps.MAX_REPAIRS
-        ) {
-            for (const spawn of Object.values(spawns)) {
-                if (spawn.isActive() && !spawn.spawning) {
-                    RoleRepair.spawn(spawn, energyCapacityAvailable);
+            case myCreeps.repairs.length < damagedSructures.length / 3 &&
+                settings.global.IS_FIXING &&
+                myCreeps.repairs.length < settings.creeps.MAX_REPAIRS:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleBuilderr.spawn(spawn, energyCapacityAvailable);
+                        break;
+                    }
                 }
-            }
+                break;
         }
     });
 };
