@@ -1097,8 +1097,7 @@ declare const ConstructionSite: ConstructionSiteConstructor;
 interface Creep extends RoomObject {
     readonly prototype: Creep;
     harvestEnergy: () => void;
-    run: () => void;
-    spawn: () => void;
+    run: (creep: Creep) => void;
     findEnergySource: () => Source | null;
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;

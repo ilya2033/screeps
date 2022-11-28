@@ -12,9 +12,9 @@ import roleHarvester from "../roles/role.harvester";
 import roleWarrior from "../roles/role.warrior";
 import roleBuilder from "../roles/role.builder";
 import roleArcher from "../roles/role.archer";
-import roleRepair from "../roles/role.repair";
 import roleHealer from "../roles/role.healer";
 import settings from "../settings";
+import RoleRepair from "../roles/RoleRepair";
 
 const creepsSpawnScript = function () {
     for (let creepName in Memory.creeps) {
@@ -120,7 +120,7 @@ const creepsSpawnScript = function () {
         ) {
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
-                    roleRepair.spawn(spawn, energyCapacityAvailable);
+                    RoleRepair.spawn(spawn, energyCapacityAvailable);
                 }
             }
         }

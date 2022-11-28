@@ -1,8 +1,7 @@
 import { IBuilder } from "../types/Builder";
 
-const roleBuilder = {
-    /** @param {Creep} creep **/
-    run: function (creep: IBuilder) {
+class roleBuilder extends Creep implements IBuilder {
+    static run = (creep: IBuilder) => {
         if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.building = false;
             creep.say("🔄 harvest");
@@ -33,9 +32,11 @@ const roleBuilder = {
         } else {
             creep.harvestEnergy();
         }
-    },
-    /** @param {StructureSpawn} spawn **/
-    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
+    };
+    static spawn = (
+        spawn: StructureSpawn,
+        energyCapacityAvailable?: number
+    ) => {
         let setup = [WORK, MOVE, CARRY];
         switch (energyCapacityAvailable) {
             case 550:
@@ -45,7 +46,7 @@ const roleBuilder = {
         spawn.spawnCreep(setup, `Builder${Game.time}`, {
             memory: { role: "builder" },
         });
-    },
-};
+    };
+}
 
 export default roleBuilder;

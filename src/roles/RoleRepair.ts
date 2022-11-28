@@ -1,8 +1,12 @@
-import settings from "../settings";
 import { IRepair } from "../types/Repair";
 
-const roleRepair = {
-    run: function (creep: IRepair) {
+import RoleWorker from "./RoleWorker";
+import settings from "../settings";
+
+class RoleRepair extends RoleWorker implements IRepair {
+    static #roleName = "repair";
+
+    static run = (creep: IRepair) => {
         const freeCapacity = creep.store.getFreeCapacity();
         if (creep.memory.repairing && creep.store[RESOURCE_ENERGY] == 0) {
             creep.memory.repairing = false;
@@ -31,29 +35,12 @@ const roleRepair = {
                     });
                 }
             } else {
-                if (
-                    creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])
-                ) {
-                    return;
-                }
-                creep.say("😴 sleep");
-                creep.moveToSpawnPoint();
+                this.sleep(creep);
             }
         } else {
             creep.harvestEnergy();
         }
-    },
-    spawn: (spawn: StructureSpawn, energyCapacityAvailable?: number) => {
-        let setup = [WORK, MOVE, CARRY];
-        switch (energyCapacityAvailable) {
-            case 550:
-                setup = [WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE];
-                break;
-        }
-        spawn.spawnCreep(setup, `Repair${Game.time}`, {
-            memory: { role: "repair" },
-        });
-    },
-};
+    };
+}
 
-export default roleRepair;
+export default RoleRepair;
