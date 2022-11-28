@@ -28,7 +28,9 @@ const creepsSpawnScript = function () {
         const spawns = room.find(FIND_MY_SPAWNS);
         const energyCapacityAvailable = room.energyCapacityAvailable;
         const damagedSructures = room.find(FIND_STRUCTURES, {
-            filter: (structure) => structure.hits < structure.hitsMax,
+            filter: (structure) =>
+                structure.hits < structure.hitsMax &&
+                structure.structureType !== STRUCTURE_WALL,
         });
 
         const harvesters = Object.values(creeps).filter(

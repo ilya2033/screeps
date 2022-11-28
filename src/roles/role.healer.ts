@@ -1,5 +1,7 @@
+import { IHealer } from "../types/Healer";
+
 const roleHealer = {
-    run: function (creep: Creep) {
+    run: function (creep: IHealer) {
         const closestWounded = creep.pos.findClosestByPath(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax,
         });
@@ -11,7 +13,7 @@ const roleHealer = {
                 });
             }
         } else {
-            if (creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])) {
+            if (creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])) {
                 return;
             }
             creep.say("😴 sleep");

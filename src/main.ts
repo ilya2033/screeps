@@ -50,9 +50,7 @@ export const loop = () => {
     upgraders.forEach((creep) => roleUpgrader.run(creep));
     repairs.forEach((creep) => roleRepair.run(creep));
 
-    if (hostiles.length) {
-        warriors.forEach((creep) => roleWarrior.run(creep));
-        archers.forEach((creep) => roleArcher.run(creep));
-        healers.forEach((creep) => roleHealer.run(creep));
-    }
+    warriors.forEach((creep) => roleWarrior.run(creep));
+    archers.forEach((creep) => roleArcher.run(creep));
+    healers.forEach((creep) => roleHealer.run(creep));
 };
