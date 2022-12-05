@@ -6,23 +6,23 @@
  * var mod = require('creeps.spawn');
  * mod.thing == 'a thing'; // true
  */
-import RoleWarrior from "../roles/RoleWarrior";
 import RoleArcher from "../roles/RoleArcher";
+import RoleHarvester from "../roles/RoleHarvester";
 import RoleHealer from "../roles/RoleHealer";
 import RoleUpgrader from "../roles/RoleUpgrader";
-import RoleHarvester from "../roles/RoleHarvester";
+import RoleWarrior from "../roles/RoleWarrior";
 
 import RoleBuilder from "../roles/RoleBuilder";
 
-import settings from "../settings";
 import RoleRepair from "../roles/RoleRepair";
-import { IHarvester } from "../types/Harvester";
+import settings from "../settings";
+import { IArcher } from "../types/Archer";
 import { IBuilder } from "../types/Builder";
+import { IHarvester } from "../types/Harvester";
+import { IHealer } from "../types/Healer";
 import { IRepair } from "../types/Repair";
 import { IUpgrader } from "../types/Upgrader";
 import { IWarrior } from "../types/Warrior";
-import { IArcher } from "../types/Archer";
-import { IHealer } from "../types/Healer";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -90,14 +90,14 @@ const creepsSpawnScript = function () {
         const harvestersCondition =
             !isHostiles &&
             (myCreeps.harvesters.length < settings.creeps.MIN_HARVESTERS ||
-                (myCreeps.harvesters.length < creepsPerSource &&
+                (myCreeps.harvesters.length <= creepsPerSource &&
                     myCreeps.harvesters.length <
                         settings.creeps.MAX_HARVESTERS));
 
         const upgradersCondition =
             !isHostiles &&
             (myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||
-                (myCreeps.upgraders.length < creepsPerSource &&
+                (myCreeps.upgraders.length <= creepsPerSource &&
                     myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS));
 
         const warriorsCondition =
@@ -118,7 +118,7 @@ const creepsSpawnScript = function () {
         const buildersCondition =
             !isHostiles &&
             (myCreeps.builders.length < settings.creeps.MIN_BUILDERS ||
-                (myCreeps.builders.length < creepsPerSource &&
+                (myCreeps.builders.length <= creepsPerSource &&
                     myCreeps.builders.length < settings.creeps.MAX_BUILDERS));
 
         const repairsCondition =
@@ -131,7 +131,7 @@ const creepsSpawnScript = function () {
             case harvestersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleHarvester.spawn(spawn, energyCapacityAvailable);
+                        RoleHarvester.spawn(spawn);
                         break;
                     }
                 }
@@ -139,7 +139,8 @@ const creepsSpawnScript = function () {
             case upgradersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleUpgrader.spawn(spawn, energyCapacityAvailable);
+                        RoleUpgrader.spawn(spawn);
+                        console.log("upgrader");
                         break;
                     }
                 }
@@ -147,7 +148,7 @@ const creepsSpawnScript = function () {
             case warriorsCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleWarrior.spawn(spawn, energyCapacityAvailable);
+                        RoleWarrior.spawn(spawn);
                         break;
                     }
                 }
@@ -155,7 +156,7 @@ const creepsSpawnScript = function () {
             case archerCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleArcher.spawn(spawn, energyCapacityAvailable);
+                        RoleArcher.spawn(spawn);
                         break;
                     }
                 }
@@ -164,7 +165,7 @@ const creepsSpawnScript = function () {
             case healersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleHealer.spawn(spawn, energyCapacityAvailable);
+                        RoleHealer.spawn(spawn);
                         break;
                     }
                 }
@@ -173,7 +174,7 @@ const creepsSpawnScript = function () {
             case buildersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleBuilder.spawn(spawn, energyCapacityAvailable);
+                        RoleBuilder.spawn(spawn);
                         break;
                     }
                 }
@@ -182,7 +183,7 @@ const creepsSpawnScript = function () {
             case repairsCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleRepair.spawn(spawn, energyCapacityAvailable);
+                        RoleRepair.spawn(spawn);
                         break;
                     }
                 }

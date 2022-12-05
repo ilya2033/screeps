@@ -3,13 +3,33 @@ import { ISolder } from "../types/Solder";
 const RoleSolder = {
     defaultSetupT1: [ATTACK, TOUGH, MOVE],
     defaultSetupT2: [ATTACK, ATTACK, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE],
+    defaultSetupT3: [
+        ATTACK,
+        ATTACK,
+        ATTACK,
+        ATTACK,
+        TOUGH,
+        TOUGH,
+        TOUGH,
+        TOUGH,
+        MOVE,
+        MOVE,
+        MOVE,
+        MOVE,
+    ],
     roleName: "",
-    spawn: function (spawn: StructureSpawn, energyCapacityAvailable?: number) {
+    spawn: function (spawn: StructureSpawn, basicParts = this.basicParts) {
         let setup = this.defaultSetupT1;
-        switch (energyCapacityAvailable) {
-            case 550:
-                setup = this.defaultSetupT2;
-                break;
+        if (spawn.room.energyAvailable === spawn.room.energyCapacityAvailable) {
+            switch (true) {
+                case spawn.room.energyAvailable >= 800:
+                    setup = this.defaultSetupT2;
+                    break;
+
+                case spawn.room.energyAvailable >= 550:
+                    setup = this.defaultSetupT2;
+                    break;
+            }
         }
         spawn.spawnCreep(
             setup,

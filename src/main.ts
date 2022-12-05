@@ -14,44 +14,60 @@ import { IRepair } from "./types/Repair";
 import RoleRepair from "./roles/RoleRepair";
 
 import RoleUpgrader from "roles/RoleUpgrader";
+import RoleTower from "./roles/RoleTower";
 
 runAllFC();
 
 export const loop = () => {
     creepsSpawnScript();
 
-    const hostiles = Object.values(Game.creeps).filter((creep) => !creep.my);
+    Object.values(Game.rooms).forEach((room) => {
+        const creeps = room.find(FIND_MY_CREEPS);
+        const hostiles = room.find(FIND_HOSTILE_CREEPS);
 
-    const harvesters: IHarvester[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "harvester"
-    );
-    const builders: IBuilder[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "builder"
-    );
-    const upgraders: IUpgrader[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "upgrader"
-    );
-    const warriors: IWarrior[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "warrior"
-    );
+        const harvesters: IHarvester[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "harvester"
+        );
+        const builders: IBuilder[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "builder"
+        );
+        const upgraders: IUpgrader[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "upgrader"
+        );
+        const warriors: IWarrior[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "warrior"
+        );
 
-    const archers: IArcher[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "archer"
-    );
-    const repairs: IRepair[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "repair"
-    );
+        const archers: IArcher[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "archer"
+        );
+        const repairs: IRepair[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "repair"
+        );
 
-    const healers: IRepair[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "healer"
-    );
+        const healers: IRepair[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "healer"
+        );
 
-    harvesters.forEach((creep) => RoleHarvester.run(creep));
-    builders.forEach((creep) => RoleBuilderr.run(creep));
-    upgraders.forEach((creep) => RoleUpgrader.run(creep));
-    repairs.forEach((creep) => RoleRepair.run(creep));
+        let towers = [];
 
-    warriors.forEach((creep) => RoleWarrior.run(creep));
-    archers.forEach((creep) => RoleArcher.run(creep));
-    healers.forEach((creep) => RoleHealer.run(creep));
+        if (hostiles.length) {
+            towers = room.find(FIND_MY_STRUCTURES, {
+                filter: { structureType: STRUCTURE_TOWER },
+            });
+        }
+
+        if (towers.length) {
+            towers.forEach((tower) => RoleTower.run(tower));
+        }
+
+        harvesters.forEach((creep) => RoleHarvester.run(creep));
+        builders.forEach((creep) => RoleBuilderr.run(creep));
+        upgraders.forEach((creep) => RoleUpgrader.run(creep));
+        repairs.forEach((creep) => RoleRepair.run(creep));
+
+        warriors.forEach((creep) => RoleWarrior.run(creep));
+        archers.forEach((creep) => RoleArcher.run(creep));
+        healers.forEach((creep) => RoleHealer.run(creep));
+    });
 };

@@ -5,8 +5,10 @@ import RoleSolder from "./RoleSolder";
 const RoleHealer = {
     ...RoleSolder,
     ...{
+        basicParts: [HEAL, HEAL, MOVE],
         defaultSetupT1: [HEAL, MOVE],
         defaultSetupT2: [HEAL, HEAL, MOVE],
+        defaultSetupT3: [HEAL, HEAL, TOUGH, MOVE, MOVE],
         roleName: "healer",
         run: function (creep: IHealer) {
             const closestWounded = creep.pos.findClosestByPath(FIND_MY_CREEPS, {

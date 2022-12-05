@@ -7,6 +7,21 @@ const RoleWarrior = {
     ...{
         defaultSetupT1: [ATTACK, TOUGH, MOVE],
         defaultSetupT2: [ATTACK, ATTACK, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE],
+        defaultSetupT3: [
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            TOUGH,
+            TOUGH,
+            TOUGH,
+            TOUGH,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+        ],
+        basicParts: [ATTACK, TOUGH, MOVE],
         roleName: "warrior",
         run: function (creep: IWarrior) {
             const closestHostile =

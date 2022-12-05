@@ -1101,7 +1101,7 @@ interface Creep extends RoomObject {
     findEnergySource: () => Source | null;
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;
-    spawn: (spawn: StructureSpawn, energyCapacityAvailable: number) => void;
+    spawn: (spawn: StructureSpawn, basicParts?: Body[]) => void;
     findStorage: (
         resourceType?: ResourceConstant
     ) => StructureStorage | StructureContainer | null;

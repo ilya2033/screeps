@@ -5,8 +5,17 @@ import RoleSolder from "./RoleSolder";
 const RoleArcher = {
     ...RoleSolder,
     ...{
-        defaultSetupT1: [RANGED_ATTACK, MOVE],
+        basicParts: [RANGED_ATTACK, TOUGH, MOVE],
+        defaultSetupT1: [RANGED_ATTACK, TOUGH, MOVE],
         defaultSetupT2: [
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            RANGED_ATTACK,
+            MOVE,
+            MOVE,
+        ],
+        defaultSetupT3: [
+            RANGED_ATTACK,
             RANGED_ATTACK,
             RANGED_ATTACK,
             RANGED_ATTACK,
