@@ -25,7 +25,7 @@ const RoleWarrior = {
         roleName: "warrior",
         run: function (creep: IWarrior) {
             const closestHostile =
-                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+                creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
 
             if (closestHostile) {
                 creep.say("Attack");

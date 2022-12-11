@@ -1,9 +1,5 @@
 const conf = {
-    global: {
-        IS_FIXING: true,
-    },
     creeps: {
-        MAX_REPAIRS: 4,
         MAX_WARRIORS: 2,
         MAX_HARVESTERS: 2,
         MAX_ARCHERS: 3,

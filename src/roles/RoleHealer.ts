@@ -11,9 +11,12 @@ const RoleHealer = {
         defaultSetupT3: [HEAL, HEAL, TOUGH, MOVE, MOVE],
         roleName: "healer",
         run: function (creep: IHealer) {
-            const closestWounded = creep.pos.findClosestByPath(FIND_MY_CREEPS, {
-                filter: (creep) => creep.hits < creep.hitsMax,
-            });
+            const closestWounded = creep.pos.findClosestByRange(
+                FIND_MY_CREEPS,
+                {
+                    filter: (creep) => creep.hits < creep.hitsMax,
+                }
+            );
             if (closestWounded) {
                 creep.say("Heal");
                 if (creep.heal(closestWounded) == ERR_NOT_IN_RANGE) {

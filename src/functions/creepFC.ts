@@ -43,33 +43,33 @@ export const creepFC = () => {
         let storedSource = <Source | null>(
             Game.getObjectById(this.memory.sourceId)
         );
-        const droppedEnergy = this.pos.findClosestByPath(
-            FIND_DROPPED_RESOURCES,
-            {
-                filter: (r: Resource) =>
-                    r.resourceType == RESOURCE_ENERGY &&
-                    r.amount >= 50 &&
-                    r.pos.getOpenPositions().length,
-            }
-        );
+        // const droppedEnergy = this.pos.findClosestByPath(
+        //     FIND_DROPPED_RESOURCES,
+        //     {
+        //         filter: (r: Resource) =>
+        //             r.resourceType == RESOURCE_ENERGY &&
+        //             r.amount >= 50 &&
+        //             r.pos.getOpenPositions().length,
+        //     }
+        // );
 
-        const ruinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
-            filter: (r: Ruin) =>
-                r.store[RESOURCE_ENERGY] >= 50 &&
-                r.pos.getOpenPositions().length,
-        });
-        if (droppedEnergy || ruinEnergy) {
-            const toWithdraw = droppedEnergy || ruinEnergy;
+        // const ruinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
+        //     filter: (r: Ruin) =>
+        //         r.store[RESOURCE_ENERGY] >= 50 &&
+        //         r.pos.getOpenPositions().length,
+        // });
+        // if (droppedEnergy || ruinEnergy) {
+        //     const toWithdraw = droppedEnergy || ruinEnergy;
 
-            if (this.pos.isNearTo(toWithdraw)) {
-                this.withdraw(toWithdraw, RESOURCE_ENERGY);
-            } else {
-                this.moveTo(toWithdraw, {
-                    visualizePathStyle: { stroke: "#ffaa00" },
-                });
-            }
-            return;
-        }
+        //     if (this.pos.isNearTo(toWithdraw)) {
+        //         this.withdraw(toWithdraw, RESOURCE_ENERGY);
+        //     } else {
+        //         this.moveTo(toWithdraw, {
+        //             visualizePathStyle: { stroke: "#ffaa00" },
+        //         });
+        //     }
+        //     return;
+        // }
 
         if (
             !storedSource ||

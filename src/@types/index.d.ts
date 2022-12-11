@@ -3386,7 +3386,9 @@ interface CreepMemory {
 }
 interface FlagMemory {}
 interface PowerCreepMemory {}
-interface RoomMemory {}
+interface RoomMemory {
+    damagedStructures?: Structure[];
+}
 interface SpawnMemory {}
 
 declare const Memory: Memory;

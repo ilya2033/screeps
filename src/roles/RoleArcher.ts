@@ -25,7 +25,7 @@ const RoleArcher = {
         roleName: "archer",
         run: function (creep: IArcher) {
             const closestHostile =
-                creep.pos.findClosestByPath(FIND_HOSTILE_CREEPS);
+                creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
             if (closestHostile) {
                 creep.say("Attack");
                 if (creep.rangedAttack(closestHostile) == ERR_NOT_IN_RANGE) {
