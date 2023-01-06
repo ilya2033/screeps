@@ -38,16 +38,15 @@ const RoleBuilder = {
                 let buildTargets = [
                     ...creep.room.find(FIND_CONSTRUCTION_SITES),
                 ];
-
-                if (buildTargets.length) {
-                    if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(buildTargets[0], {
-                            visualizePathStyle: { stroke: "#ffffff" },
-                        });
-                    }
+                if (routeToRoomsToHelp) {
+                    creep.moveTo(routeToRoomsToHelp);
                 } else {
-                    if (routeToRoomsToHelp) {
-                        creep.moveTo(routeToRoomsToHelp);
+                    if (buildTargets.length) {
+                        if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
+                            creep.moveTo(buildTargets[0], {
+                                visualizePathStyle: { stroke: "#ffffff" },
+                            });
+                        }
                     } else {
                         this.sleep(creep);
                     }
