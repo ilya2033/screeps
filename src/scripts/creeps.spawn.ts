@@ -22,6 +22,8 @@ import { IHealer } from "../types/Healer";
 import { IUpgrader } from "../types/Upgrader";
 import { IWarrior } from "../types/Warrior";
 import { IWorker } from "../types/Worker";
+import { IClaimer } from "../types/Claimer";
+import RoleClaimer from "../roles/RoleClaimer";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -30,6 +32,7 @@ interface MyCreeps {
     warriors?: IWarrior[];
     archers?: IArcher[];
     healers?: IHealer[];
+    claimers?: IClaimer[];
 }
 
 const creepsSpawnScript = function () {
@@ -37,6 +40,9 @@ const creepsSpawnScript = function () {
         if (!Game.creeps[creepName]) {
             delete Memory.creeps[creepName];
         }
+    }
+    if (!Memory.needBuildCreeps) {
+        Memory.needBuildCreeps = [];
     }
 
     Object.values(Game.rooms).forEach((room) => {
@@ -80,8 +86,16 @@ const creepsSpawnScript = function () {
             (creep) => creep.memory.role === "healer"
         );
 
+        myCreeps.claimers = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "claimer"
+        );
+
         const isHostiles = hostiles.length;
-        const creepsPerSource = Math.ceil(sourcesWalkablePlaces / 2);
+        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.75);
+
+        const claimersCondition =
+            !!Game.flags[`${room.name}-attackPoint`] &&
+            myCreeps.claimers.length < 2;
 
         const harvestersCondition =
             myCreeps.harvesters.length < settings.creeps.MIN_HARVESTERS ||
@@ -105,11 +119,24 @@ const creepsSpawnScript = function () {
                 myCreeps.healers.length < settings.creeps.MAX_HEALERS) ||
             toHeal.length;
 
-        const buildersCondition =
+        let buildersCondition =
             !isHostiles &&
             toBuild.length &&
             myCreeps.builders.length <= creepsPerSource &&
             myCreeps.builders.length < settings.creeps.MAX_BUILDERS;
+
+        if (Memory.needBuildCreeps?.length) {
+            const roomsToHelp = Memory.needBuildCreeps.filter((name) =>
+                Object.values(Game.map.describeExits(room.name) || []).includes(
+                    name
+                )
+            );
+            if (roomsToHelp.length) {
+                if (!myCreeps.builders.length) {
+                    buildersCondition = true;
+                }
+            }
+        }
 
         switch (true) {
             case harvestersCondition:
@@ -153,7 +180,14 @@ const creepsSpawnScript = function () {
                     }
                 }
                 break;
-
+            case claimersCondition:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning && !safeMode) {
+                        RoleClaimer.spawn(spawn);
+                        break;
+                    }
+                }
+                break;
             case buildersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {

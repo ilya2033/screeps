@@ -1102,9 +1102,9 @@ interface Creep extends RoomObject {
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;
     spawn: (spawn: StructureSpawn, basicParts?: Body[]) => void;
-    findStorage: (
+    findStorages: (
         resourceType?: ResourceConstant
-    ) => StructureStorage | StructureContainer | null;
+    ) => [StructureStorage | StructureContainer] | null;
     /**
      * An array describing the creep's body.
      */
@@ -3379,6 +3379,7 @@ interface Memory {
     flags: { [name: string]: FlagMemory };
     rooms: { [name: string]: RoomMemory };
     spawns: { [name: string]: SpawnMemory };
+    needBuildCreeps?: string[];
 }
 
 interface CreepMemory {
@@ -3387,7 +3388,7 @@ interface CreepMemory {
 interface FlagMemory {}
 interface PowerCreepMemory {}
 interface RoomMemory {
-    damagedStructures?: Structure[];
+    damagedStructures?: Id<Structure>[];
 }
 interface SpawnMemory {}
 

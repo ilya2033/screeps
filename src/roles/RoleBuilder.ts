@@ -14,9 +14,29 @@ const RoleBuilder = {
                 creep.memory.building = true;
                 creep.say("🚧 build");
             }
+            let roomsToHelp = [];
+            let routeToRoomsToHelp = null;
+            if (Memory.needBuildCreeps?.length) {
+                roomsToHelp = Memory.needBuildCreeps.filter((name) =>
+                    Object.values(
+                        Game.map.describeExits(creep.room.name) || []
+                    ).includes(name)
+                );
 
+                if (roomsToHelp.length) {
+                    const route = Game.map.findRoute(
+                        creep.room.name,
+                        roomsToHelp[0]
+                    );
+                    routeToRoomsToHelp = creep.pos.findClosestByRange(
+                        route[0].exit
+                    );
+                }
+            }
             if (creep.memory.building) {
-                const buildTargets = creep.room.find(FIND_CONSTRUCTION_SITES);
+                let buildTargets = [
+                    ...creep.room.find(FIND_CONSTRUCTION_SITES),
+                ];
 
                 if (buildTargets.length) {
                     if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
@@ -25,7 +45,11 @@ const RoleBuilder = {
                         });
                     }
                 } else {
-                    this.sleep(creep);
+                    if (routeToRoomsToHelp) {
+                        creep.moveTo(routeToRoomsToHelp);
+                    } else {
+                        this.sleep(creep);
+                    }
                 }
             } else {
                 creep.harvestEnergy();

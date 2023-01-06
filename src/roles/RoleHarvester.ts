@@ -19,9 +19,18 @@ const RoleHarvester = {
                         );
                     },
                 });
+                const storages: Structure[] = creep.room.find(FIND_STRUCTURES, {
+                    filter: (structure) => {
+                        return (
+                            structure.structureType == STRUCTURE_STORAGE &&
+                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                        );
+                    },
+                });
 
-                const selectedTarget: Structure | null =
-                    creep.pos.findClosestByPath(targets);
+                const selectedTarget: Structure | null = targets.length
+                    ? creep.pos.findClosestByPath(targets)
+                    : creep.pos.findClosestByPath(storages);
 
                 if (selectedTarget) {
                     if (

@@ -1,10 +1,28 @@
 const conf = {
+    structs: {
+        wall: {
+            MIN_HP: 700000,
+            MAX_HP: 1000000,
+        },
+        controller: {
+            ticksToDowngrade: {
+                1: 20000,
+                2: 10000,
+                3: 20000,
+                4: 40000,
+                5: 80000,
+                6: 120000,
+                7: 150000,
+                8: 200000,
+            },
+        },
+    },
     creeps: {
         MAX_WARRIORS: 2,
         MAX_HARVESTERS: 2,
         MAX_ARCHERS: 3,
         MAX_BUILDERS: 3,
-        MAX_UPGRADERS: 3,
+        MAX_UPGRADERS: 5,
         MAX_HEALERS: 2,
 
         MIN_HARVESTERS: 2,

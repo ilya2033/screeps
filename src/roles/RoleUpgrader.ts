@@ -1,3 +1,4 @@
+import conf from "../settings";
 import { IUpgrader } from "../types/Upgrader";
 import RoleWorker from "./RoleWorker";
 
@@ -14,15 +15,20 @@ const upgrade = (creep: IUpgrader) => {
 };
 
 const repair = (creep: IUpgrader) => {
-    const closestDamagedStructure = creep.pos.findClosestByRange(
-        creep.room.memory.damagedStructures || []
+    const damagedStructures = creep.room.memory.damagedStructures.map(
+        (ds_id: Id<Structure>) => Game.getObjectById(ds_id)
     );
-    if (closestDamagedStructure) {
+
+    if (damagedStructures.length) {
+        const closestDamagedStructure =
+            creep.pos.findClosestByRange(damagedStructures);
         if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
             creep.moveTo(closestDamagedStructure, {
                 visualizePathStyle: { stroke: "#ffffff" },
             });
         }
+    } else {
+        upgrade(creep);
     }
 };
 
@@ -42,7 +48,7 @@ const RoleUpgrader = {
             if (creep.memory.working) {
                 if (
                     creep.room.memory.damagedStructures.length &&
-                    !(creep.room.controller.ticksToDowngrade < 3000)
+                    !(creep.room.controller.ticksToDowngrade < 9000)
                 ) {
                     repair(creep);
                 } else {
