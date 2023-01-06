@@ -14,17 +14,12 @@ export const creepFC = () => {
         return null;
     };
 
-    Creep.prototype.findStorages = function (resourceType) {
+    Creep.prototype.findStorages = function () {
         const storages: [StructureStorage | StructureContainer] =
             this.room.find(FIND_STRUCTURES, {
                 filter: (structure) =>
                     structure.structureType === STRUCTURE_CONTAINER ||
-                    (structure.structureType === STRUCTURE_STORAGE &&
-                        (resourceType
-                            ? structure?.storage?.getUsedCapacity(
-                                  resourceType
-                              ) || false
-                            : true)),
+                    structure.structureType === STRUCTURE_STORAGE,
             });
 
         if (storages.length) {
@@ -52,8 +47,9 @@ export const creepFC = () => {
         if (this.memory.role !== "harvester") {
             const closestStorage = this.pos.findClosestByPath(
                 this.findStorages(RESOURCE_ENERGY),
-                { filter: (st) => st.store[RESOURCE_ENERGY] }
+                { filter: (st) => st.store[RESOURCE_ENERGY] > 0 }
             );
+
             const closestLink = this.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (st) =>
                     st.structureType === STRUCTURE_LINK && st.capacity > 0,
@@ -71,10 +67,16 @@ export const creepFC = () => {
         }
 
         const closestTarget = this.pos.findClosestByPath(targets);
-
         if (closestTarget) {
             if (this.pos.isNearTo(closestTarget)) {
-                this.harvest(closestTarget);
+                if (
+                    closestTarget.structureType === STRUCTURE_CONTAINER ||
+                    closestTarget.structureType === STRUCTURE_STORAGE
+                ) {
+                    this.withdraw(closestTarget, RESOURCE_ENERGY);
+                } else {
+                    this.harvest(closestTarget);
+                }
             } else {
                 this.moveTo(closestTarget, {
                     visualizePathStyle: { stroke: "#ffaa00" },

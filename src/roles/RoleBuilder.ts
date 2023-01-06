@@ -16,8 +16,9 @@ const RoleBuilder = {
             }
             let roomsToHelp = [];
             let routeToRoomsToHelp = null;
-            if (Memory.needBuildCreeps?.length) {
-                roomsToHelp = Memory.needBuildCreeps.filter((name) =>
+
+            if (Memory.needCreeps.builders?.length) {
+                roomsToHelp = Memory.needCreeps.builders.filter((name) =>
                     Object.values(
                         Game.map.describeExits(creep.room.name) || []
                     ).includes(name)

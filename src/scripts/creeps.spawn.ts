@@ -41,8 +41,8 @@ const creepsSpawnScript = function () {
             delete Memory.creeps[creepName];
         }
     }
-    if (!Memory.needBuildCreeps) {
-        Memory.needBuildCreeps = [];
+    if (!Memory.needCreeps) {
+        Memory.needCreeps = { builders: [], upgraders: [], solders: [] };
     }
 
     Object.values(Game.rooms).forEach((room) => {
@@ -125,8 +125,8 @@ const creepsSpawnScript = function () {
             myCreeps.builders.length <= creepsPerSource &&
             myCreeps.builders.length < settings.creeps.MAX_BUILDERS;
 
-        if (Memory.needBuildCreeps?.length) {
-            const roomsToHelp = Memory.needBuildCreeps.filter((name) =>
+        if (Memory.needCreeps.builders?.length) {
+            const roomsToHelp = Memory.needCreeps.builders.filter((name) =>
                 Object.values(Game.map.describeExits(room.name) || []).includes(
                     name
                 )

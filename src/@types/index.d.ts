@@ -3379,7 +3379,7 @@ interface Memory {
     flags: { [name: string]: FlagMemory };
     rooms: { [name: string]: RoomMemory };
     spawns: { [name: string]: SpawnMemory };
-    needBuildCreeps?: string[];
+    needCreeps?: { upgraders: string[]; solders: string[]; builders: string[] };
 }
 
 interface CreepMemory {

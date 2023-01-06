@@ -45,17 +45,44 @@ const RoleUpgrader = {
                 creep.memory.working = true;
                 creep.say("⚡ work");
             }
-            if (creep.memory.working) {
-                if (
-                    creep.room.memory.damagedStructures.length &&
-                    !(creep.room.controller.ticksToDowngrade < 9000)
-                ) {
-                    repair(creep);
-                } else {
-                    upgrade(creep);
+            let roomsToHelp = [];
+            let routeToRoomsToHelp = null;
+
+            if (Memory.needCreeps.builders?.length) {
+                roomsToHelp = Memory.needCreeps.builders.filter((name) =>
+                    Object.values(
+                        Game.map.describeExits(creep.room.name) || []
+                    ).includes(name)
+                );
+
+                if (roomsToHelp.length) {
+                    const route = Game.map.findRoute(
+                        creep.room.name,
+                        roomsToHelp[0]
+                    );
+                    routeToRoomsToHelp = creep.pos.findClosestByRange(
+                        route[0].exit
+                    );
                 }
+            }
+            if (
+                routeToRoomsToHelp &&
+                !(creep.room.controller.ticksToDowngrade < 9000)
+            ) {
+                creep.moveTo(routeToRoomsToHelp);
             } else {
-                creep.harvestEnergy();
+                if (creep.memory.working) {
+                    if (
+                        creep.room.memory.damagedStructures.length &&
+                        !(creep.room.controller.ticksToDowngrade < 9000)
+                    ) {
+                        repair(creep);
+                    } else {
+                        upgrade(creep);
+                    }
+                } else {
+                    creep.harvestEnergy();
+                }
             }
         },
     },

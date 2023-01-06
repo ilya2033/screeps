@@ -117,15 +117,38 @@ export const loop = () => {
             });
         }
 
-        if (!room.find(FIND_MY_SPAWNS).length && !builders.length) {
-            if (!Memory.needBuildCreeps.includes(room.name)) {
-                Memory.needBuildCreeps = [
-                    ...(Memory.needBuildCreeps || []),
-                    room.name,
-                ];
+        if (!room.find(FIND_MY_SPAWNS).length) {
+            if (!builders.length) {
+                if (!Memory.needCreeps.builders.includes(room.name)) {
+                    Memory.needCreeps.builders = [
+                        ...(Memory.needCreeps.builders || []),
+                        room.name,
+                    ];
+                }
+            } else {
+                Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
+                    (name) => name !== room.name
+                );
+            }
+
+            if (!upgraders.length) {
+                if (!Memory.needCreeps.upgraders.includes(room.name)) {
+                    Memory.needCreeps.upgraders = [
+                        ...(Memory.needCreeps.upgraders || []),
+                        room.name,
+                    ];
+                }
+            } else {
+                Memory.needCreeps.upgraders =
+                    Memory.needCreeps.upgraders.filter(
+                        (name) => name !== room.name
+                    );
             }
         } else {
-            Memory.needBuildCreeps = Memory.needBuildCreeps.filter(
+            Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
+                (name) => name !== room.name
+            );
+            Memory.needCreeps.upgraders = Memory.needCreeps.upgraders.filter(
                 (name) => name !== room.name
             );
         }
