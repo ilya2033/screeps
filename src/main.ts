@@ -118,7 +118,7 @@ export const loop = () => {
         }
 
         if (!room.find(FIND_MY_SPAWNS).length) {
-            if (!builders.length) {
+            if (builders.length < 2) {
                 if (!Memory.needCreeps.builders.includes(room.name)) {
                     Memory.needCreeps.builders = [
                         ...(Memory.needCreeps.builders || []),
@@ -149,6 +149,22 @@ export const loop = () => {
                 (name) => name !== room.name
             );
             Memory.needCreeps.upgraders = Memory.needCreeps.upgraders.filter(
+                (name) => name !== room.name
+            );
+        }
+
+        if (
+            hostiles.length &&
+            warriors.length + healers.length + archers.length < 3
+        ) {
+            if (!Memory.needCreeps.solders.includes(room.name)) {
+                Memory.needCreeps.solders = Memory.needCreeps.solders = [
+                    ...(Memory.needCreeps.solders || []),
+                    room.name,
+                ];
+            }
+        } else {
+            Memory.needCreeps.solders = Memory.needCreeps.solders.filter(
                 (name) => name !== room.name
             );
         }

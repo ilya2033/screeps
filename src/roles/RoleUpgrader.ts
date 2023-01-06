@@ -69,7 +69,7 @@ const RoleUpgrader = {
                 routeToRoomsToHelp &&
                 !(creep.room.controller.ticksToDowngrade < 9000)
             ) {
-                creep.moveTo(routeToRoomsToHelp);
+                this.help();
             } else {
                 if (creep.memory.working) {
                     if (

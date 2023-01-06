@@ -107,14 +107,14 @@ const creepsSpawnScript = function () {
             (myCreeps.upgraders.length <= creepsPerSource &&
                 myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS);
 
-        const warriorsCondition =
+        let warriorsCondition =
             isHostiles &&
             myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
 
-        const archerCondition =
+        let archersCondition =
             isHostiles && myCreeps.archers.length < settings.creeps.MAX_ARCHERS;
 
-        const healersCondition =
+        let healersCondition =
             (isHostiles &&
                 myCreeps.healers.length < settings.creeps.MAX_HEALERS) ||
             toHeal.length;
@@ -134,6 +134,26 @@ const creepsSpawnScript = function () {
             if (roomsToHelp.length) {
                 if (!myCreeps.builders.length) {
                     buildersCondition = true;
+                }
+            }
+        }
+
+        if (Memory.needCreeps.solders?.length && !isHostiles) {
+            const roomsToHelp = Memory.needCreeps.solders.filter((name) =>
+                Object.values(Game.map.describeExits(room.name) || []).includes(
+                    name
+                )
+            );
+            if (roomsToHelp.length) {
+                if (
+                    myCreeps.warriors.length +
+                        myCreeps.healers.length +
+                        myCreeps.archers.length <
+                    3
+                ) {
+                    warriorsCondition = true;
+                    healersCondition = true;
+                    archersCondition = true;
                 }
             }
         }
@@ -163,7 +183,7 @@ const creepsSpawnScript = function () {
                     }
                 }
                 break;
-            case archerCondition:
+            case archersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
                         RoleArcher.spawn(spawn);

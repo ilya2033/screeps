@@ -66,11 +66,37 @@ const RoleSolder = {
     },
 
     sleep: function (creep: ISolder) {
+        this.help();
         if (creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])) {
             return;
         }
         creep.say("😴 sleep");
         creep.moveToDefendPoint();
+    },
+    help: function (creep: ISolder) {
+        let roomsToHelp = [];
+        let routeToRoomsToHelp = null;
+
+        if (Memory.needCreeps.solders?.length) {
+            roomsToHelp = Memory.needCreeps.solders.filter((name) =>
+                Object.values(
+                    Game.map.describeExits(creep.room.name) || []
+                ).includes(name)
+            );
+
+            if (roomsToHelp.length) {
+                const route = Game.map.findRoute(
+                    creep.room.name,
+                    roomsToHelp[0]
+                );
+                routeToRoomsToHelp = creep.pos.findClosestByRange(
+                    route[0].exit
+                );
+            }
+        }
+        if (routeToRoomsToHelp) {
+            creep.moveTo(routeToRoomsToHelp);
+        }
     },
 };
 

@@ -1,6 +1,7 @@
 export const creepFC = () => {
     Creep.prototype.findEnergySource = function () {
         const sources: Source[] = this.room.find(FIND_SOURCES);
+
         if (sources.length) {
             const source = Object.values(sources).find(
                 (s) => s.pos.getOpenPositions().length > 0 && s.energy > 0
@@ -36,7 +37,8 @@ export const creepFC = () => {
         if (
             !storedSource ||
             (!storedSource.pos.getOpenPositions().length &&
-                !this.pos.isNearTo(storedSource))
+                !this.pos.isNearTo(storedSource)) ||
+            storedSource.room.name !== this.room.name
         ) {
             delete this.memory.sourceId;
             storedSource = this.findEnergySource();
@@ -55,7 +57,7 @@ export const creepFC = () => {
                     st.structureType === STRUCTURE_LINK && st.capacity > 0,
             });
 
-            if (closestStorage) {
+            if (closestStorage && !storedSource) {
                 targets[targets.length] = closestStorage;
             }
             if (closestLink) {

@@ -35,9 +35,8 @@ const RoleBuilder = {
                 }
             }
             if (creep.memory.building) {
-                let buildTargets = [
-                    ...creep.room.find(FIND_CONSTRUCTION_SITES),
-                ];
+                let buildTargets = creep.room.find(FIND_CONSTRUCTION_SITES);
+
                 if (routeToRoomsToHelp) {
                     creep.moveTo(routeToRoomsToHelp);
                 } else {

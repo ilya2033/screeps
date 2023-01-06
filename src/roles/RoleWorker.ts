@@ -83,11 +83,37 @@ const RoleWorker = {
     },
 
     sleep: function (creep: IWorker) {
+        this.help();
         if (creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])) {
             return;
         }
         creep.say("😴 sleep");
         creep.moveToSpawnPoint();
+    },
+    help: function (creep: IWorker) {
+        let roomsToHelp = [];
+        let routeToRoomsToHelp = null;
+        const toHelpRoleName = `${this.role}s`;
+        if (Memory.needCreeps[toHelpRoleName]?.length) {
+            roomsToHelp = Memory.needCreeps[toHelpRoleName].filter((name) =>
+                Object.values(
+                    Game.map.describeExits(creep.room.name) || []
+                ).includes(name)
+            );
+
+            if (roomsToHelp.length) {
+                const route = Game.map.findRoute(
+                    creep.room.name,
+                    roomsToHelp[0]
+                );
+                routeToRoomsToHelp = creep.pos.findClosestByRange(
+                    route[0].exit
+                );
+            }
+        }
+        if (routeToRoomsToHelp) {
+            creep.moveTo(routeToRoomsToHelp);
+        }
     },
 };
 
