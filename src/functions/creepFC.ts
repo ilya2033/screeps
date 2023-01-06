@@ -37,33 +37,6 @@ export const creepFC = () => {
         let storedSource = <Source | null>(
             Game.getObjectById(this.memory.sourceId)
         );
-        // const droppedEnergy = this.pos.findClosestByPath(
-        //     FIND_DROPPED_RESOURCES,
-        //     {
-        //         filter: (r: Resource) =>
-        //             r.resourceType == RESOURCE_ENERGY &&
-        //             r.amount >= 50 &&
-        //             r.pos.getOpenPositions().length,
-        //     }
-        // );
-
-        // const ruinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
-        //     filter: (r: Ruin) =>
-        //         r.store[RESOURCE_ENERGY] >= 50 &&
-        //         r.pos.getOpenPositions().length,
-        // });
-        // if (droppedEnergy || ruinEnergy) {
-        //     const toWithdraw = droppedEnergy || ruinEnergy;
-
-        //     if (this.pos.isNearTo(toWithdraw)) {
-        //         this.withdraw(toWithdraw, RESOURCE_ENERGY);
-        //     } else {
-        //         this.moveTo(toWithdraw, {
-        //             visualizePathStyle: { stroke: "#ffaa00" },
-        //         });
-        //     }
-        //     return;
-        // }
 
         if (
             !storedSource ||
@@ -72,24 +45,38 @@ export const creepFC = () => {
         ) {
             delete this.memory.sourceId;
             storedSource = this.findEnergySource();
-            if (this.memory.role !== "harvester") {
-                const closestStorage = this.pos.findClosestByPath(
-                    this.findStorages(RESOURCE_ENERGY),
-                    { filter: (st) => st.store[RESOURCE_ENERGY] }
-                );
-                if (this.pos.isNearTo(closestStorage)) {
-                    this.harvest(closestStorage);
-                } else {
-                    this.moveTo(closestStorage, {
-                        visualizePathStyle: { stroke: "#ffaa00" },
-                    });
-                }
+        }
+
+        let targets = [];
+
+        if (this.memory.role !== "harvester") {
+            const closestStorage = this.pos.findClosestByPath(
+                this.findStorages(RESOURCE_ENERGY),
+                { filter: (st) => st.store[RESOURCE_ENERGY] }
+            );
+            const closestLink = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (st) =>
+                    st.structureType === STRUCTURE_LINK && st.capacity > 0,
+            });
+
+            if (closestStorage) {
+                targets[targets.length] = closestStorage;
             }
-        } else {
-            if (this.pos.isNearTo(storedSource)) {
-                this.harvest(storedSource);
+            if (closestLink) {
+                targets[targets.length] = closestLink;
+            }
+        }
+        if (storedSource) {
+            targets[targets.length] = storedSource;
+        }
+
+        const closestTarget = this.pos.findClosestByPath(targets);
+
+        if (closestTarget) {
+            if (this.pos.isNearTo(closestTarget)) {
+                this.harvest(closestTarget);
             } else {
-                this.moveTo(storedSource, {
+                this.moveTo(closestTarget, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
