@@ -41,9 +41,6 @@ const creepsSpawnScript = function () {
             delete Memory.creeps[creepName];
         }
     }
-    if (!Memory.needCreeps) {
-        Memory.needCreeps = { builders: [], upgraders: [], solders: [] };
-    }
 
     Object.values(Game.rooms).forEach((room) => {
         const creeps = room.find(FIND_MY_CREEPS);
@@ -93,16 +90,16 @@ const creepsSpawnScript = function () {
         const isHostiles = hostiles.length;
         const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.75);
 
-        const claimersCondition =
+        let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&
             myCreeps.claimers.length < 2;
 
-        const harvestersCondition =
+        let harvestersCondition =
             myCreeps.harvesters.length < settings.creeps.MIN_HARVESTERS ||
             (myCreeps.harvesters.length <= creepsPerSource &&
                 myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS);
 
-        const upgradersCondition =
+        let upgradersCondition =
             myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||
             (myCreeps.upgraders.length <= creepsPerSource &&
                 myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS);
@@ -154,6 +151,32 @@ const creepsSpawnScript = function () {
                     warriorsCondition = true;
                     healersCondition = true;
                     archersCondition = true;
+                }
+            }
+        }
+
+        if (Memory.powerBanks?.length) {
+            const roomsWithPower = Memory.powerBanks.filter((name) =>
+                Object.values(Game.map.describeExits(room.name) || []).includes(
+                    name
+                )
+            );
+            if (roomsWithPower.length) {
+                const roomWithPower = roomsWithPower[0];
+                if (
+                    !Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
+                        filter: (creep) => creep.memory.role === "healer",
+                    }).length
+                ) {
+                    healersCondition = true;
+                } else {
+                    if (
+                        !Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
+                            filter: (creep) => creep.memory.role === "warrior",
+                        }).length
+                    ) {
+                        warriorsCondition = true;
+                    }
                 }
             }
         }

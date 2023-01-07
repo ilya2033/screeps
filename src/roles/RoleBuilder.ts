@@ -14,32 +14,11 @@ const RoleBuilder = {
                 creep.memory.building = true;
                 creep.say("🚧 build");
             }
-            let roomsToHelp = [];
-            let routeToRoomsToHelp = null;
 
-            if (Memory.needCreeps.builders?.length) {
-                roomsToHelp = Memory.needCreeps.builders.filter((name) =>
-                    Object.values(
-                        Game.map.describeExits(creep.room.name) || []
-                    ).includes(name)
-                );
-
-                if (roomsToHelp.length) {
-                    const route = Game.map.findRoute(
-                        creep.room.name,
-                        roomsToHelp[0]
-                    );
-                    routeToRoomsToHelp = creep.pos.findClosestByRange(
-                        route[0].exit
-                    );
-                }
-            }
             if (creep.memory.building) {
                 let buildTargets = creep.room.find(FIND_CONSTRUCTION_SITES);
 
-                if (routeToRoomsToHelp) {
-                    creep.moveTo(routeToRoomsToHelp);
-                } else {
+                if (!this.help(creep)) {
                     if (buildTargets.length) {
                         if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
                             creep.moveTo(buildTargets[0], {
@@ -47,7 +26,9 @@ const RoleBuilder = {
                             });
                         }
                     } else {
-                        this.sleep(creep);
+                        if (!this.repair(creep)) {
+                            this.sleep(creep);
+                        }
                     }
                 }
             } else {

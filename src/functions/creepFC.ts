@@ -15,6 +15,28 @@ export const creepFC = () => {
         return null;
     };
 
+    Creep.prototype.findPowerBank = function () {
+        const powerBanks: StructurePowerBank[] = this.room.find(
+            FIND_STRUCTURES,
+            {
+                filter: (st: Structure) =>
+                    st.structureType === STRUCTURE_POWER_BANK,
+            }
+        );
+
+        if (powerBanks.length) {
+            const powerBank = Object.values(powerBanks).find(
+                (s) => s.pos.getOpenPositions().length > 0
+            );
+
+            if (powerBank) {
+                this.memory.powerBankId = powerBank.id;
+                return powerBank;
+            }
+        }
+        return null;
+    };
+
     Creep.prototype.findStorages = function () {
         const storages: [StructureStorage | StructureContainer] =
             this.room.find(FIND_STRUCTURES, {
@@ -38,13 +60,32 @@ export const creepFC = () => {
             !storedSource ||
             (!storedSource.pos.getOpenPositions().length &&
                 !this.pos.isNearTo(storedSource)) ||
-            storedSource.room.name !== this.room.name
+            storedSource.room.name !== this.room.name ||
+            storedSource.energy === 0
         ) {
             delete this.memory.sourceId;
             storedSource = this.findEnergySource();
         }
 
         let targets = [];
+        const closestDroppedEnergy = this.pos.findClosestByPath(
+            FIND_DROPPED_RESOURCES,
+            {
+                filter: (r: Resource) =>
+                    r.resourceType == RESOURCE_ENERGY &&
+                    r.amount > 0 &&
+                    r.pos.getOpenPositions().length,
+            }
+        );
+
+        const closestRuinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
+            filter: (r: Ruin) =>
+                r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
+        });
+
+        if (closestDroppedEnergy || closestRuinEnergy) {
+            targets[targets.length] = closestDroppedEnergy || closestRuinEnergy;
+        }
 
         if (this.memory.role !== "harvester") {
             const closestStorage = this.pos.findClosestByPath(
@@ -57,30 +98,34 @@ export const creepFC = () => {
                     st.structureType === STRUCTURE_LINK && st.capacity > 0,
             });
 
-            if (closestStorage && !storedSource) {
-                targets[targets.length] = closestStorage;
-            }
             if (closestLink) {
                 targets[targets.length] = closestLink;
+            }
+
+            if (closestStorage && !storedSource) {
+                targets[targets.length] = closestStorage;
             }
         }
         if (storedSource) {
             targets[targets.length] = storedSource;
         }
 
-        const closestTarget = this.pos.findClosestByPath(targets);
-        if (closestTarget) {
-            if (this.pos.isNearTo(closestTarget)) {
+        const target = this.pos.findClosestByPath(targets);
+        if (target) {
+            if (this.pos.isNearTo(target)) {
                 if (
-                    closestTarget.structureType === STRUCTURE_CONTAINER ||
-                    closestTarget.structureType === STRUCTURE_STORAGE
+                    this.withdraw(target, RESOURCE_ENERGY) ===
+                    ERR_INVALID_TARGET
                 ) {
-                    this.withdraw(closestTarget, RESOURCE_ENERGY);
-                } else {
-                    this.harvest(closestTarget);
+                    if (
+                        this.pickup(target, RESOURCE_ENERGY) ===
+                        ERR_INVALID_TARGET
+                    ) {
+                        this.harvest(target);
+                    }
                 }
             } else {
-                this.moveTo(closestTarget, {
+                this.moveTo(target, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }

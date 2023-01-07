@@ -20,7 +20,22 @@ import RoleClaimer from "./roles/RoleClaimer";
 runAllFC();
 
 export const loop = () => {
+    if (!Memory.needCreeps) {
+        Memory.needCreeps = { builders: [], upgraders: [], solders: [] };
+    }
+    if (!Memory.powerBanks) {
+        Memory.powerBanks = [];
+    }
     creepsSpawnScript();
+    if (Memory.powerBanks?.length) {
+        Memory.powerBanks = Memory.powerBanks.filter(
+            (roomId) =>
+                Game.rooms[roomId].find(FIND_STRUCTURES, {
+                    filter: (st: Structure) =>
+                        st.structureType === STRUCTURE_POWER_BANK,
+                }).length
+        );
+    }
 
     Object.values(Game.rooms).forEach((room) => {
         const creeps = room.find(FIND_MY_CREEPS);
@@ -78,10 +93,27 @@ export const loop = () => {
                 room.memory.damagedStructures || []
             ).filter((struct_id) => {
                 const struct = Game.getObjectById(struct_id);
-
+                if (!struct) {
+                    return false;
+                }
                 return struct.structureType !== STRUCTURE_WALL
                     ? struct.hits < struct.hitsMax * 0.9
                     : struct.hits <= conf.structs.wall.MAX_HP;
+            });
+        }
+        const roomsWithPower = Object.values(
+            Game.map.describeExits(room.name)
+        ).filter(
+            (roomId) =>
+                Game.rooms[roomId]?.find(FIND_STRUCTURES, {
+                    filter: (st: Structure) =>
+                        st.structureType === STRUCTURE_POWER_BANK,
+                }).length
+        );
+
+        if (roomsWithPower.length) {
+            roomsWithPower.forEach((room) => {
+                Memory.powerBanks = [...Memory.powerBanks, room];
             });
         }
 
@@ -116,59 +148,61 @@ export const loop = () => {
                 filter: { structureType: STRUCTURE_TOWER },
             });
         }
+        if (room.controller?.my) {
+            if (!room.find(FIND_MY_SPAWNS).length) {
+                if (builders.length < 2) {
+                    if (!Memory.needCreeps.builders.includes(room.name)) {
+                        Memory.needCreeps.builders = [
+                            ...(Memory.needCreeps.builders || []),
+                            room.name,
+                        ];
+                    }
+                } else {
+                    Memory.needCreeps.builders =
+                        Memory.needCreeps.builders.filter(
+                            (name) => name !== room.name
+                        );
+                }
 
-        if (!room.find(FIND_MY_SPAWNS).length) {
-            if (builders.length < 2) {
-                if (!Memory.needCreeps.builders.includes(room.name)) {
-                    Memory.needCreeps.builders = [
-                        ...(Memory.needCreeps.builders || []),
-                        room.name,
-                    ];
+                if (!upgraders.length) {
+                    if (!Memory.needCreeps.upgraders.includes(room.name)) {
+                        Memory.needCreeps.upgraders = [
+                            ...(Memory.needCreeps.upgraders || []),
+                            room.name,
+                        ];
+                    }
+                } else {
+                    Memory.needCreeps.upgraders =
+                        Memory.needCreeps.upgraders.filter(
+                            (name) => name !== room.name
+                        );
                 }
             } else {
                 Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
                     (name) => name !== room.name
                 );
-            }
-
-            if (!upgraders.length) {
-                if (!Memory.needCreeps.upgraders.includes(room.name)) {
-                    Memory.needCreeps.upgraders = [
-                        ...(Memory.needCreeps.upgraders || []),
-                        room.name,
-                    ];
-                }
-            } else {
                 Memory.needCreeps.upgraders =
                     Memory.needCreeps.upgraders.filter(
                         (name) => name !== room.name
                     );
             }
-        } else {
-            Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
-                (name) => name !== room.name
-            );
-            Memory.needCreeps.upgraders = Memory.needCreeps.upgraders.filter(
-                (name) => name !== room.name
-            );
-        }
 
-        if (
-            hostiles.length &&
-            warriors.length + healers.length + archers.length < 3
-        ) {
-            if (!Memory.needCreeps.solders.includes(room.name)) {
-                Memory.needCreeps.solders = Memory.needCreeps.solders = [
-                    ...(Memory.needCreeps.solders || []),
-                    room.name,
-                ];
+            if (
+                hostiles.length &&
+                warriors.length + healers.length + archers.length < 3
+            ) {
+                if (!Memory.needCreeps.solders.includes(room.name)) {
+                    Memory.needCreeps.solders = Memory.needCreeps.solders = [
+                        ...(Memory.needCreeps.solders || []),
+                        room.name,
+                    ];
+                }
+            } else {
+                Memory.needCreeps.solders = Memory.needCreeps.solders.filter(
+                    (name) => name !== room.name
+                );
             }
-        } else {
-            Memory.needCreeps.solders = Memory.needCreeps.solders.filter(
-                (name) => name !== room.name
-            );
         }
-
         if (towers.length) {
             towers.forEach((tower) => RoleTower.run(tower));
         }

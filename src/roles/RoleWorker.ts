@@ -90,20 +90,50 @@ const RoleWorker = {
         creep.say("😴 sleep");
         creep.moveToSpawnPoint();
     },
+    upgrade: function (creep: IWorker) {
+        if (creep.room.controller) {
+            if (
+                creep.upgradeController(creep.room.controller) ==
+                ERR_NOT_IN_RANGE
+            ) {
+                creep.moveTo(creep.room.controller, {
+                    visualizePathStyle: { stroke: "#ffffff" },
+                });
+            }
+        }
+    },
+    repair: function (creep: IWorker) {
+        const damagedStructures = creep.room.memory.damagedStructures.map(
+            (ds_id: Id<Structure>) => Game.getObjectById(ds_id)
+        );
+
+        if (damagedStructures.length) {
+            const closestDamagedStructure =
+                creep.pos.findClosestByRange(damagedStructures);
+            if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(closestDamagedStructure, {
+                    visualizePathStyle: { stroke: "#ffffff" },
+                });
+            }
+            return true;
+        } else {
+            return this.upgrade(creep);
+        }
+    },
     help: function (creep: IWorker) {
         let roomsToHelp = [];
         let routeToRoomsToHelp = null;
-        const toHelpRoleName = `${this.role}s`;
+        const toHelpRoleName = `${this.roleName}s`;
         if (Memory.needCreeps[toHelpRoleName]?.length) {
             roomsToHelp = Memory.needCreeps[toHelpRoleName].filter((name) =>
                 Object.values(
-                    Game.map.describeExits(creep.room.name) || []
+                    Game.map.describeExits(creep?.room.name) || []
                 ).includes(name)
             );
 
             if (roomsToHelp.length) {
                 const route = Game.map.findRoute(
-                    creep.room.name,
+                    creep?.room.name,
                     roomsToHelp[0]
                 );
                 routeToRoomsToHelp = creep.pos.findClosestByRange(
@@ -112,8 +142,12 @@ const RoleWorker = {
             }
         }
         if (routeToRoomsToHelp) {
-            creep.moveTo(routeToRoomsToHelp);
+            creep.moveTo(routeToRoomsToHelp, {
+                visualizePathStyle: { stroke: "#ffffff" },
+            });
+            return true;
         }
+        return false;
     },
 };
 

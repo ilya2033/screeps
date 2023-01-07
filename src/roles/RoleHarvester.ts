@@ -6,7 +6,7 @@ const RoleHarvester = {
     ...{
         roleName: "harvester",
         run: function (creep: IHarvester) {
-            if (creep.store.getFreeCapacity() > 0) {
+            if (creep.store.energy === 0) {
                 creep.harvestEnergy();
             } else {
                 const targets: Structure[] = creep.room.find(FIND_STRUCTURES, {
@@ -45,7 +45,9 @@ const RoleHarvester = {
                 }
 
                 if (!selectedTarget && creep.store.getFreeCapacity() === 0) {
-                    this.sleep(creep);
+                    if (!this.repair(creep)) {
+                        this.sleep(creep);
+                    }
                 }
             }
         },

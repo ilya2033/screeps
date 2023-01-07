@@ -66,16 +66,23 @@ const RoleSolder = {
     },
 
     sleep: function (creep: ISolder) {
-        this.help();
-        if (creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])) {
-            return;
+        if (!this.help(creep)) {
+            if (creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])) {
+                return;
+            }
+            creep.say("😴 sleep");
+            creep.moveToDefendPoint();
         }
-        creep.say("😴 sleep");
-        creep.moveToDefendPoint();
     },
     help: function (creep: ISolder) {
         let roomsToHelp = [];
         let routeToRoomsToHelp = null;
+        let roomsWithPower = [];
+        let routeToRoomsWithPower = null;
+
+        if (!creep) {
+            return;
+        }
 
         if (Memory.needCreeps.solders?.length) {
             roomsToHelp = Memory.needCreeps.solders.filter((name) =>
@@ -97,6 +104,51 @@ const RoleSolder = {
         if (routeToRoomsToHelp) {
             creep.moveTo(routeToRoomsToHelp);
         }
+
+        if (
+            (Memory.powerBanks.length && creep.memory.role === "healer") ||
+            creep.memory.role === "warrior"
+        ) {
+            roomsWithPower = Memory.powerBanks.filter((name) =>
+                Object.values(
+                    Game.map.describeExits(creep.room.name) || []
+                ).includes(name)
+            );
+            if (creep.memory.role === "healer") {
+                roomsWithPower = roomsWithPower.filter(
+                    (roomName) =>
+                        !Game.rooms[roomName].find(FIND_MY_CREEPS, {
+                            filter: (creep) => creep.memory.role !== "healer",
+                        })
+                );
+            }
+
+            if (creep.memory.role === "warrior") {
+                roomsWithPower = roomsWithPower.filter(
+                    (roomName) =>
+                        !Game.rooms[roomName].find(FIND_MY_CREEPS, {
+                            filter: (creep) => creep.memory.role !== "warrior",
+                        })
+                );
+            }
+            if (roomsWithPower.length) {
+                const route = Game.map.findRoute(
+                    creep.room.name,
+                    roomsWithPower[0]
+                );
+                routeToRoomsWithPower = creep.pos.findClosestByRange(
+                    route[0].exit
+                );
+            }
+        }
+        if (routeToRoomsToHelp) {
+            creep.moveTo(routeToRoomsToHelp);
+            return true;
+        } else if (routeToRoomsWithPower) {
+            creep.moveTo(routeToRoomsWithPower);
+            return true;
+        }
+        return false;
     },
 };
 

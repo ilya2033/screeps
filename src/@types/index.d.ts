@@ -1099,6 +1099,7 @@ interface Creep extends RoomObject {
     harvestEnergy: () => void;
     run: (creep: Creep) => void;
     findEnergySource: () => Source | null;
+    findPowerBank: () => StructurePowerBank | null;
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;
     spawn: (spawn: StructureSpawn, basicParts?: Body[]) => void;
@@ -3380,6 +3381,7 @@ interface Memory {
     rooms: { [name: string]: RoomMemory };
     spawns: { [name: string]: SpawnMemory };
     needCreeps?: { upgraders: string[]; solders: string[]; builders: string[] };
+    powerBanks?: string[];
 }
 
 interface CreepMemory {
