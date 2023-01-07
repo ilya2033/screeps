@@ -52,22 +52,25 @@ export const creepFC = () => {
     };
 
     Creep.prototype.harvestEnergy = function () {
-        let storedSource = <Source | null>(
-            Game.getObjectById(this.memory.sourceId)
-        );
+        let targets = [];
+        let storedSource = null;
+        if (this.memory.role !== "track") {
+            storedSource = <Source | null>(
+                Game.getObjectById(this.memory.sourceId)
+            );
 
-        if (
-            !storedSource ||
-            (!storedSource.pos.getOpenPositions().length &&
-                !this.pos.isNearTo(storedSource)) ||
-            storedSource.room.name !== this.room.name ||
-            storedSource.energy === 0
-        ) {
-            delete this.memory.sourceId;
-            storedSource = this.findEnergySource();
+            if (
+                !storedSource ||
+                (!storedSource.pos.getOpenPositions().length &&
+                    !this.pos.isNearTo(storedSource)) ||
+                storedSource.room.name !== this.room.name ||
+                storedSource.energy === 0
+            ) {
+                delete this.memory.sourceId;
+                storedSource = this.findEnergySource();
+            }
         }
 
-        let targets = [];
         const closestDroppedEnergy = this.pos.findClosestByPath(
             FIND_DROPPED_RESOURCES,
             {
@@ -93,10 +96,13 @@ export const creepFC = () => {
                 { filter: (st) => st.store[RESOURCE_ENERGY] > 0 }
             );
 
-            const closestLink = this.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (st) =>
-                    st.structureType === STRUCTURE_LINK && st.capacity > 0,
-            });
+            const closestLink =
+                this.memory.role !== "track" &&
+                this.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (st) =>
+                        st.structureType === STRUCTURE_LINK &&
+                        st.store[RESOURCE_ENERGY] > 0,
+                });
 
             if (closestLink) {
                 targets[targets.length] = closestLink;
@@ -111,6 +117,7 @@ export const creepFC = () => {
         }
 
         const target = this.pos.findClosestByPath(targets);
+
         if (target) {
             if (this.pos.isNearTo(target)) {
                 if (

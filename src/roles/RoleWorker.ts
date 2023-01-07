@@ -100,7 +100,9 @@ const RoleWorker = {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
+            return true;
         }
+        return false;
     },
     repair: function (creep: IWorker) {
         const damagedStructures = creep.room.memory.damagedStructures.map(
@@ -108,10 +110,13 @@ const RoleWorker = {
         );
 
         if (damagedStructures.length) {
-            const closestDamagedStructure =
-                creep.pos.findClosestByRange(damagedStructures);
-            if (creep.repair(closestDamagedStructure) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(closestDamagedStructure, {
+            const selectedDamagedStructure = creep.pos.findClosestByPath(
+                damagedStructures
+                    .sort((a, b) => a.hits - b.hits)
+                    .filter((st, non, arr) => st.hits <= arr[0].hits * 1.3)
+            );
+            if (creep.repair(selectedDamagedStructure) == ERR_NOT_IN_RANGE) {
+                creep.moveTo(selectedDamagedStructure, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }

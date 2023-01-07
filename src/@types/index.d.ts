@@ -3390,6 +3390,7 @@ interface CreepMemory {
 interface FlagMemory {}
 interface PowerCreepMemory {}
 interface RoomMemory {
+    controlUpgrader?: string;
     damagedStructures?: Id<Structure>[];
 }
 interface SpawnMemory {}

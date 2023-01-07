@@ -22,9 +22,9 @@ const conf = {
         MAX_HARVESTERS: 2,
         MAX_ARCHERS: 3,
         MAX_BUILDERS: 3,
-        MAX_UPGRADERS: 5,
+        MAX_UPGRADERS: 3,
         MAX_HEALERS: 2,
-
+        MAX_TRACKS: 2,
         MIN_HARVESTERS: 2,
         MIN_UPGRADERS: 1,
         MIN_BUILDERS: 1,

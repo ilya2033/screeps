@@ -16,6 +16,7 @@ import RoleTower from "./roles/RoleTower";
 import { IHealer } from "./types/Healer";
 import conf from "./settings";
 import RoleClaimer from "./roles/RoleClaimer";
+import RoleTrack from "./roles/RoleTrack";
 
 runAllFC();
 
@@ -40,6 +41,9 @@ export const loop = () => {
     Object.values(Game.rooms).forEach((room) => {
         const creeps = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
+        let links: StructureLink[] = room.find(FIND_STRUCTURES, {
+            filter: (st) => st.structureType === STRUCTURE_LINK,
+        });
 
         room.memory.damagedStructures =
             room.memory.damagedStructures?.filter(
@@ -117,6 +121,25 @@ export const loop = () => {
             });
         }
 
+        if (links.length > 1) {
+            links.sort(
+                (a, b) => b.store[RESOURCE_ENERGY] - a.store[RESOURCE_ENERGY]
+            );
+            if (
+                links[0].store[RESOURCE_ENERGY] >= 100 &&
+                links[0].store[RESOURCE_ENERGY] >=
+                    links[links.length - 1].store[RESOURCE_ENERGY] * 1.2
+            ) {
+                links[0].transferEnergy(
+                    links[links.length - 1],
+                    Math.floor(
+                        links[0].store[RESOURCE_ENERGY] -
+                            links[links.length - 1].store[RESOURCE_ENERGY]
+                    ) / 2
+                );
+            }
+        }
+
         const harvesters: IHarvester[] = Object.values(creeps).filter(
             (creep) => creep.memory.role === "harvester"
         );
@@ -141,12 +164,26 @@ export const loop = () => {
         const claimers: IHealer[] = Object.values(creeps).filter(
             (creep) => creep.memory.role === "claimer"
         );
+
+        const tracks: IHealer[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "track"
+        );
         let towers = [];
+
+        room.memory.controlUpgrader =
+            room.controller.pos.findClosestByPath(upgraders)?.name || null;
 
         if (hostiles.length) {
             towers = room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_TOWER },
             });
+            const spawn = room.find(FIND_MY_SPAWNS)[0];
+            if (
+                (spawn && spawn.hits < spawn.hitsMax) ||
+                room.controller.ticksToDowngrade < 1000
+            ) {
+                room.controller.activateSafeMode();
+            }
         }
         if (room.controller?.my) {
             if (!room.find(FIND_MY_SPAWNS).length) {
@@ -214,5 +251,6 @@ export const loop = () => {
         archers.forEach((creep) => RoleArcher.run(creep));
         healers.forEach((creep) => RoleHealer.run(creep));
         claimers.forEach((creep) => RoleClaimer.run(creep));
+        tracks.forEach((creep) => RoleTrack.run(creep));
     });
 };

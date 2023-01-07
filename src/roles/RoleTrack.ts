@@ -1,25 +1,12 @@
 import RoleWorker from "./RoleWorker";
-import { IHarvester } from "../types/Harvester";
+import { ITrack } from "../types/Track";
 
-const RoleHarvester = {
+const RoleTrack = {
     ...RoleWorker,
     ...{
-        roleName: "harvester",
-        run: function (creep: IHarvester) {
-            const droppedResource = creep.room.find(FIND_DROPPED_RESOURCES, {
-                filter: (res) => res.resourceType !== RESOURCE_ENERGY,
-            });
-            if (droppedResource.length) {
-                const selectedResourse =
-                    creep.pos.findClosestByPath(droppedResource);
-                if (creep.pickup(selectedResourse) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(selectedResourse, {
-                        visualizePathStyle: { stroke: "#ffffff" },
-                    });
-                }
-                return true;
-            }
-            if (creep.store.getFreeCapacity()) {
+        roleName: "track",
+        run: function (creep: ITrack) {
+            if (creep.store.energy === 0) {
                 creep.harvestEnergy();
             } else {
                 const targets: Structure[] = creep.store[RESOURCE_ENERGY]
@@ -41,21 +28,9 @@ const RoleHarvester = {
                           },
                       })
                     : [];
-                const storages: Structure[] = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return (
-                            (structure.structureType == STRUCTURE_STORAGE ||
-                                structure.structureType === STRUCTURE_LINK ||
-                                structure.structureType ===
-                                    STRUCTURE_CONTAINER) &&
-                            structure.store.getFreeCapacity() > 0
-                        );
-                    },
-                });
 
-                const selectedTarget: Structure | null = storages.length
-                    ? creep.pos.findClosestByPath(storages)
-                    : creep.pos.findClosestByPath(targets);
+                const selectedTarget: Structure | null =
+                    creep.pos.findClosestByPath(targets);
 
                 if (selectedTarget) {
                     if (
@@ -67,7 +42,6 @@ const RoleHarvester = {
                         });
                     }
                 }
-
                 if (!selectedTarget && creep.store.getFreeCapacity() === 0) {
                     if (!this.repair(creep)) {
                         this.sleep(creep);
@@ -78,4 +52,4 @@ const RoleHarvester = {
     },
 };
 
-export default RoleHarvester as unknown as IHarvester;
+export default RoleTrack as unknown as ITrack;

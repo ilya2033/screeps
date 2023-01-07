@@ -16,22 +16,24 @@ const RoleUpgrader = {
                 creep.say("⚡ work");
             }
 
-            if (
-                !(creep.room.controller.ticksToDowngrade < 9000) ||
-                !this.help(creep)
-            ) {
-                if (creep.memory.working) {
-                    if (
-                        creep.room.memory.damagedStructures.length &&
-                        !(creep.room.controller.ticksToDowngrade < 9000)
-                    ) {
+            if (creep.memory.working) {
+                if (
+                    creep.room.controller.ticksToDowngrade > 9000 &&
+                    creep.name !== creep.room.memory.controlUpgrader
+                ) {
+                    if (this.help(creep)) {
+                        return;
+                    }
+                    if (creep.room.memory.damagedStructures.length) {
                         this.repair(creep);
                     } else {
                         this.upgrade(creep);
                     }
                 } else {
-                    creep.harvestEnergy();
+                    this.upgrade(creep);
                 }
+            } else {
+                creep.harvestEnergy();
             }
         },
     },

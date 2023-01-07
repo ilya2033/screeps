@@ -24,6 +24,9 @@ import { IWarrior } from "../types/Warrior";
 import { IWorker } from "../types/Worker";
 import { IClaimer } from "../types/Claimer";
 import RoleClaimer from "../roles/RoleClaimer";
+import { ITrack } from "../types/Track";
+import RoleTrack from "../roles/RoleTrack";
+import conf from "../settings";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -33,6 +36,7 @@ interface MyCreeps {
     archers?: IArcher[];
     healers?: IHealer[];
     claimers?: IClaimer[];
+    tracks?: ITrack[];
 }
 
 const creepsSpawnScript = function () {
@@ -47,8 +51,10 @@ const creepsSpawnScript = function () {
         const spawns = room.find(FIND_MY_SPAWNS);
 
         const toBuild = room.find(FIND_CONSTRUCTION_SITES);
-        const toRepair = room.find(FIND_STRUCTURES, {
-            filter: (struct) => struct.hits < struct.hitsMax,
+        const storages = room.find(FIND_STRUCTURES, {
+            filter: (structure) =>
+                structure.structureType === STRUCTURE_CONTAINER ||
+                structure.structureType === STRUCTURE_STORAGE,
         });
         const toHeal = room.find(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax,
@@ -87,17 +93,18 @@ const creepsSpawnScript = function () {
             (creep) => creep.memory.role === "claimer"
         );
 
+        myCreeps.tracks = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "track"
+        );
+
         const isHostiles = hostiles.length;
-        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.75);
+        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.5);
 
         let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&
             myCreeps.claimers.length < 2;
 
-        let harvestersCondition =
-            myCreeps.harvesters.length < settings.creeps.MIN_HARVESTERS ||
-            (myCreeps.harvesters.length <= creepsPerSource &&
-                myCreeps.harvesters.length < settings.creeps.MAX_HARVESTERS);
+        let harvestersCondition = myCreeps.harvesters.length < creepsPerSource;
 
         let upgradersCondition =
             myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||
@@ -115,6 +122,12 @@ const creepsSpawnScript = function () {
             (isHostiles &&
                 myCreeps.healers.length < settings.creeps.MAX_HEALERS) ||
             toHeal.length;
+
+        let tracksCondition = !!(
+            myCreeps.tracks.length < creepsPerSource &&
+            myCreeps.tracks.length < conf.creeps.MAX_TRACKS &&
+            storages.length
+        );
 
         let buildersCondition =
             !isHostiles &&
@@ -164,9 +177,11 @@ const creepsSpawnScript = function () {
             if (roomsWithPower.length) {
                 const roomWithPower = roomsWithPower[0];
                 if (
-                    !Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
-                        filter: (creep) => creep.memory.role === "healer",
-                    }).length
+                    !(
+                        Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
+                            filter: (creep) => creep.memory.role === "healer",
+                        }).length < 2
+                    )
                 ) {
                     healersCondition = true;
                 } else {
@@ -194,6 +209,14 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleUpgrader.spawn(spawn);
+                        break;
+                    }
+                }
+                break;
+            case tracksCondition:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleTrack.spawn(spawn);
                         break;
                     }
                 }
