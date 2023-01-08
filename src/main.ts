@@ -41,6 +41,7 @@ export const loop = () => {
     Object.values(Game.rooms).forEach((room) => {
         const creeps = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
+
         let links: StructureLink[] = room.find(FIND_STRUCTURES, {
             filter: (st) => st.structureType === STRUCTURE_LINK,
         });
@@ -173,10 +174,13 @@ export const loop = () => {
         room.memory.controlUpgrader =
             room.controller.pos.findClosestByPath(upgraders)?.name || null;
 
-        if (hostiles.length) {
+        if (room.memory.damagedStructures?.length || hostiles.length) {
             towers = room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_TOWER },
             });
+        }
+
+        if (hostiles.length) {
             const spawn = room.find(FIND_MY_SPAWNS)[0];
             if (
                 (spawn && spawn.hits < spawn.hitsMax) ||

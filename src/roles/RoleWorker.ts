@@ -108,8 +108,11 @@ const RoleWorker = {
         const damagedStructures = creep.room.memory.damagedStructures.map(
             (ds_id: Id<Structure>) => Game.getObjectById(ds_id)
         );
+        const towers = creep.room.find(FIND_MY_STRUCTURES, {
+            filter: { structureType: STRUCTURE_TOWER },
+        });
 
-        if (damagedStructures.length) {
+        if (damagedStructures.length && !towers.length) {
             const selectedDamagedStructure = creep.pos.findClosestByPath(
                 damagedStructures
                     .sort((a, b) => a.hits - b.hits)

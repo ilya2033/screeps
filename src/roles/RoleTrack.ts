@@ -31,18 +31,16 @@ const RoleTrack = {
 
                 const selectedTarget: Structure | null =
                     creep.pos.findClosestByPath(targets);
-
                 if (selectedTarget) {
-                    if (
-                        creep.transfer(selectedTarget, RESOURCE_ENERGY) ==
-                        ERR_NOT_IN_RANGE
-                    ) {
+                    if (creep.pos.isNearTo(selectedTarget)) {
+                        creep.transfer(selectedTarget, RESOURCE_ENERGY);
+                    } else {
                         creep.moveTo(selectedTarget, {
                             visualizePathStyle: { stroke: "#ffffff" },
                         });
                     }
                 }
-                if (!selectedTarget && creep.store.getFreeCapacity() === 0) {
+                if (!selectedTarget && creep.store.getCapacity() !== 0) {
                     if (!this.repair(creep)) {
                         this.sleep(creep);
                     }

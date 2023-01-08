@@ -58,10 +58,20 @@ const RoleHarvester = {
                     : creep.pos.findClosestByPath(targets);
 
                 if (selectedTarget) {
-                    if (
-                        creep.transfer(selectedTarget, RESOURCE_ENERGY) ==
-                        ERR_NOT_IN_RANGE
-                    ) {
+                    if (creep.pos.isNearTo(selectedTarget)) {
+                        if (
+                            selectedTarget.structureType ===
+                                STRUCTURE_CONTAINER ||
+                            selectedTarget.structureType === STRUCTURE_STORAGE
+                        ) {
+                            creep.transfer(
+                                selectedTarget,
+                                _.findKey(creep.store)
+                            );
+                        } else {
+                            creep.transfer(selectedTarget, RESOURCE_ENERGY);
+                        }
+                    } else {
                         creep.moveTo(selectedTarget, {
                             visualizePathStyle: { stroke: "#ffffff" },
                         });
