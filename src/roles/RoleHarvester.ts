@@ -9,7 +9,7 @@ const RoleHarvester = {
             const droppedResource = creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter: (res) => res.resourceType !== RESOURCE_ENERGY,
             });
-            if (droppedResource.length) {
+            if (droppedResource.length && creep.room.storage) {
                 const selectedResourse =
                     creep.pos.findClosestByPath(droppedResource);
                 if (creep.pickup(selectedResourse) == ERR_NOT_IN_RANGE) {
@@ -19,7 +19,10 @@ const RoleHarvester = {
                 }
                 return true;
             }
-            if (creep.store.getFreeCapacity()) {
+            let checkOtherResources = Object.entries(creep.store).filter(
+                ([key, value]) => value > 1 && key !== RESOURCE_ENERGY
+            ).length;
+            if (creep.store.getFreeCapacity() && !checkOtherResources) {
                 creep.harvestEnergy();
             } else {
                 const targets: Structure[] = creep.store[RESOURCE_ENERGY]
@@ -52,18 +55,22 @@ const RoleHarvester = {
                         );
                     },
                 });
-
-                const selectedTarget: Structure | null = storages.length
-                    ? creep.pos.findClosestByPath(storages)
-                    : creep.pos.findClosestByPath(targets);
+                let selectedTarget: Structure | null = null;
+                if (checkOtherResources && creep.room.storage) {
+                    selectedTarget = creep.room.storage;
+                } else {
+                    selectedTarget = storages.length
+                        ? creep.pos.findClosestByPath(storages)
+                        : creep.pos.findClosestByPath(targets);
+                }
 
                 if (selectedTarget) {
                     if (creep.pos.isNearTo(selectedTarget)) {
                         if (
-                            selectedTarget.structureType ===
-                                STRUCTURE_CONTAINER ||
                             selectedTarget.structureType === STRUCTURE_STORAGE
                         ) {
+                            console.log(selectedTarget);
+
                             creep.transfer(
                                 selectedTarget,
                                 _.findKey(creep.store)

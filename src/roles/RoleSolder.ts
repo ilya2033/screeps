@@ -66,12 +66,10 @@ const RoleSolder = {
     },
 
     sleep: function (creep: ISolder) {
-        if (!this.help(creep)) {
-            if (creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])) {
-                return;
-            }
-            creep.say("😴 sleep");
-            creep.moveToDefendPoint();
+        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        if (!this.help(creep) && spawn) {
+            creep.moveTo(spawn);
+            creep.say("NOOOOO");
         }
     },
     help: function (creep: ISolder) {

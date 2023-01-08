@@ -86,8 +86,14 @@ export const creepFC = () => {
                 r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
         });
 
-        if (closestDroppedEnergy || closestRuinEnergy) {
-            targets[targets.length] = closestDroppedEnergy || closestRuinEnergy;
+        const closestTombEnergy = this.pos.findClosestByPath(FIND_TOMBSTONES, {
+            filter: (r: Ruin) =>
+                r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
+        });
+
+        if (closestDroppedEnergy || closestRuinEnergy || closestTombEnergy) {
+            targets[targets.length] =
+                closestDroppedEnergy || closestRuinEnergy || closestTombEnergy;
         }
 
         if (this.memory.role !== "harvester") {

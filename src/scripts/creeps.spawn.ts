@@ -59,6 +59,10 @@ const creepsSpawnScript = function () {
         const toHeal = room.find(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax,
         });
+        const towers = room.find(FIND_MY_STRUCTURES, {
+            filter: (st) =>
+                st.structureType === STRUCTURE_TOWER && st.hits === st.hitsMax,
+        });
         const sources = Object.values(room.find(FIND_SOURCES));
         const sourcesWalkablePlaces = sources.reduce(
             (prev, s: Source) => prev + s.pos.getWalkablePositions().length,
@@ -109,7 +113,10 @@ const creepsSpawnScript = function () {
         let upgradersCondition =
             myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||
             (myCreeps.upgraders.length <= creepsPerSource &&
-                myCreeps.upgraders.length < settings.creeps.MAX_UPGRADERS);
+                myCreeps.upgraders.length <
+                    (room.memory.damagedStructures?.length && !towers.length
+                        ? settings.creeps.MAX_UPGRADERS
+                        : 1));
 
         let warriorsCondition =
             isHostiles &&

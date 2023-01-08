@@ -32,10 +32,16 @@ export const loop = () => {
         Memory.powerBanks = Memory.powerBanks.filter(
             (roomId) =>
                 Game.rooms[roomId].find(FIND_STRUCTURES, {
-                    filter: (st: Structure) =>
-                        st.structureType === STRUCTURE_POWER_BANK,
+                    filter: { structureType: STRUCTURE_POWER_BANK },
                 }).length
         );
+    }
+
+    if (
+        Game.cpu.getUsed() <= Game.cpu.limit / 1.5 &&
+        Game.cpu.bucket >= 10000
+    ) {
+        Game.cpu.generatePixel();
     }
 
     Object.values(Game.rooms).forEach((room) => {
@@ -43,7 +49,7 @@ export const loop = () => {
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
 
         let links: StructureLink[] = room.find(FIND_STRUCTURES, {
-            filter: (st) => st.structureType === STRUCTURE_LINK,
+            filter: { structureType: STRUCTURE_LINK },
         });
 
         room.memory.damagedStructures =
@@ -111,8 +117,7 @@ export const loop = () => {
         ).filter(
             (roomId) =>
                 Game.rooms[roomId]?.find(FIND_STRUCTURES, {
-                    filter: (st: Structure) =>
-                        st.structureType === STRUCTURE_POWER_BANK,
+                    filter: { structureType: STRUCTURE_POWER_BANK },
                 }).length
         );
 
@@ -169,6 +174,9 @@ export const loop = () => {
         const tracks: IHealer[] = Object.values(creeps).filter(
             (creep) => creep.memory.role === "track"
         );
+
+        const solders = [...warriors, ...archers, ...healers];
+        const workers = [...tracks, ...upgraders, ...builders, ...harvesters];
         let towers = [];
 
         room.memory.controlUpgrader =
@@ -188,7 +196,17 @@ export const loop = () => {
             ) {
                 room.controller.activateSafeMode();
             }
+        } else {
+            if (solders.length && !Memory.needCreeps?.solders?.length)
+                room.find(FIND_MY_SPAWNS).forEach((spawn) => {
+                    solders.forEach((solder) => {
+                        if (spawn.pos.isNearTo(solder)) {
+                            spawn.recycleCreep(solder);
+                        }
+                    });
+                });
         }
+
         if (room.controller?.my) {
             if (!room.find(FIND_MY_SPAWNS).length) {
                 if (builders.length < 2) {
