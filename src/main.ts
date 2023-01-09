@@ -188,6 +188,45 @@ export const loop = () => {
             });
         }
 
+        room.find(FIND_MY_SPAWNS).forEach((spawn) => {
+            if (solders.length && !Memory.needCreeps?.solders?.length) {
+                solders.forEach((solder) => {
+                    if (spawn.pos.isNearTo(solder)) {
+                        spawn.recycleCreep(solder);
+                    }
+                });
+            }
+
+            workers.forEach((worker) => {
+                if (
+                    worker.memory.role === "builder" &&
+                    !room.find(FIND_CONSTRUCTION_SITES).length
+                ) {
+                    spawn.recycleCreep(worker);
+                } else {
+                    const workerTypeCreeps = Object.values(creeps).filter(
+                        (creep) => creep.memory.role === worker.memory.role
+                    );
+                    const cost = worker.body.reduce(function (cost, part) {
+                        return cost + BODYPART_COST[part.type];
+                    }, 0);
+                    if (
+                        cost < room.energyCapacityAvailable * 0.8 &&
+                        workerTypeCreeps.length <=
+                            (conf.creeps[
+                                `MAX_${worker.memory.role?.toUpperCase()}S`
+                            ] || Infinity)
+                    ) {
+                        if (spawn.pos.isNearTo(worker)) {
+                            spawn.renewCreep(worker);
+                        }
+                    } else {
+                        worker.ticksToLive < 200 && spawn.recycleCreep(worker);
+                    }
+                }
+            });
+        });
+
         if (hostiles.length) {
             const spawn = room.find(FIND_MY_SPAWNS)[0];
             if (
@@ -197,14 +236,6 @@ export const loop = () => {
                 room.controller.activateSafeMode();
             }
         } else {
-            if (solders.length && !Memory.needCreeps?.solders?.length)
-                room.find(FIND_MY_SPAWNS).forEach((spawn) => {
-                    solders.forEach((solder) => {
-                        if (spawn.pos.isNearTo(solder)) {
-                            spawn.recycleCreep(solder);
-                        }
-                    });
-                });
         }
 
         if (room.controller?.my) {

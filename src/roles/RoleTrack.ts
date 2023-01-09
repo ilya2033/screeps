@@ -6,6 +6,8 @@ const RoleTrack = {
     ...{
         roleName: "track",
         run: function (creep: ITrack) {
+            this.runBasic(creep);
+
             if (creep.store.energy === 0) {
                 creep.harvestEnergy();
             } else {

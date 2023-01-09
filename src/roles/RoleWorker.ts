@@ -77,18 +77,34 @@ const RoleWorker = {
                 Game.time
             }`,
             {
-                memory: { role: this.roleName },
+                memory: { role: this.roleName, recover: false },
             }
         );
     },
 
-    sleep: function (creep: IWorker) {
-        this.help();
-        if (creep.pos.isNearTo(Game.flags[`${creep.room}-spawnPoint`])) {
+    runBasic: function (creep: IWorker) {
+        if (creep.ticksToLive < 200) {
+            this.refresh(creep);
             return;
         }
-        creep.say("😴 sleep");
-        creep.moveToSpawnPoint();
+        if (creep.memory.recover) {
+            if (creep.ticksToLive < 1400) {
+                return;
+            }
+            creep.memory.recover = false;
+        }
+    },
+
+    sleep: function (creep: IWorker) {
+        if (this.help()) {
+            return;
+        }
+        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+
+        if (!creep.pos.isNearTo(spawn)) {
+            creep.say("😴 sleep or deat..");
+            creep.moveToSpawnPoint();
+        }
     },
     upgrade: function (creep: IWorker) {
         if (creep.room.controller) {
@@ -155,6 +171,17 @@ const RoleWorker = {
             });
             return true;
         }
+        return false;
+    },
+    refresh: function (creep: IWorker) {
+        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        if (spawn) {
+            creep.moveTo(spawn);
+            creep.memory.recover = true;
+
+            return true;
+        }
+
         return false;
     },
 };

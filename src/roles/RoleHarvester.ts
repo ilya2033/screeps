@@ -6,6 +6,8 @@ const RoleHarvester = {
     ...{
         roleName: "harvester",
         run: function (creep: IHarvester) {
+            this.runBasic(creep);
+
             const droppedResource = creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter: (res) => res.resourceType !== RESOURCE_ENERGY,
             });

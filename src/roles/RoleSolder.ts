@@ -60,7 +60,7 @@ const RoleSolder = {
                 Game.time
             }`,
             {
-                memory: { role: this.roleName },
+                memory: { role: this.roleName, recover: false },
             }
         );
     },

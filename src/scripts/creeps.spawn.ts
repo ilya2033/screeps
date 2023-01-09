@@ -102,7 +102,7 @@ const creepsSpawnScript = function () {
         );
 
         const isHostiles = hostiles.length;
-        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.5);
+        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.3);
 
         let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&

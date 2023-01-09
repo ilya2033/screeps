@@ -3386,6 +3386,7 @@ interface Memory {
 
 interface CreepMemory {
     role: string;
+    recover: boolean;
 }
 interface FlagMemory {}
 interface PowerCreepMemory {}

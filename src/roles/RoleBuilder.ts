@@ -6,6 +6,8 @@ const RoleBuilder = {
     ...{
         roleName: "builder",
         run: function (creep: IBuilder) {
+            this.runBasic(creep);
+
             if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
                 creep.memory.building = false;
                 creep.say("🔄 harvest");

@@ -1,6 +1,6 @@
-import { IWorker } from "./Worker";
+import { IWorker, IWorkerMemory } from "./Worker";
 
-export interface ICarrierMemory extends CreepMemory {
+export interface ICarrierMemory extends IWorkerMemory {
     containerId?: string;
 }
 
