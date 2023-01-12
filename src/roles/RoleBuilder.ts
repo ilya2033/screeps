@@ -6,7 +6,7 @@ const RoleBuilder = {
     ...{
         roleName: "builder",
         run: function (creep: IBuilder) {
-            this.runBasic(creep);
+            if (!this.runBasic(creep)) return;
 
             if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
                 creep.memory.building = false;

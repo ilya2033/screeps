@@ -7,7 +7,7 @@ const RoleUpgrader = {
     ...{
         roleName: "upgrader",
         run: function (creep: IUpgrader) {
-            this.runBasic(creep);
+            if (!this.runBasic(creep)) return;
 
             if (creep.memory.working && creep.store[RESOURCE_ENERGY] == 0) {
                 creep.memory.working = false;

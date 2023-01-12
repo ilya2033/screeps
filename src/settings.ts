@@ -24,10 +24,13 @@ const conf = {
         MAX_BUILDERS: 1,
         MAX_UPGRADERS: 2,
         MAX_HEALERS: 2,
+        MAX_SCOUTS: 1,
+
         MAX_TRACKS: 2,
         MIN_HARVESTERS: 2,
         MIN_UPGRADERS: 1,
         MIN_BUILDERS: 1,
+        MIN_SCOUTS: 1,
     },
 };
 

@@ -5,8 +5,9 @@ const RoleTrack = {
     ...RoleWorker,
     ...{
         roleName: "track",
+        basicParts: [CARRY, CARRY, MOVE],
         run: function (creep: ITrack) {
-            this.runBasic(creep);
+            if (!this.runBasic(creep)) return;
 
             if (creep.store.energy === 0) {
                 creep.harvestEnergy();
@@ -40,11 +41,6 @@ const RoleTrack = {
                         creep.moveTo(selectedTarget, {
                             visualizePathStyle: { stroke: "#ffffff" },
                         });
-                    }
-                }
-                if (!selectedTarget && creep.store.getCapacity() !== 0) {
-                    if (!this.repair(creep)) {
-                        this.sleep(creep);
                     }
                 }
             }

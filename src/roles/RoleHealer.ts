@@ -25,13 +25,7 @@ const RoleHealer = {
                     });
                 }
             } else {
-                if (
-                    creep.pos.isNearTo(Game.flags[`${creep.room}-defendPoint`])
-                ) {
-                    return;
-                }
-                creep.say("😴 sleep");
-                creep.moveToDefendPoint();
+                this.sleep(creep);
             }
         },
     },

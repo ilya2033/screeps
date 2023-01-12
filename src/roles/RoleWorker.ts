@@ -85,14 +85,15 @@ const RoleWorker = {
     runBasic: function (creep: IWorker) {
         if (creep.ticksToLive < 200) {
             this.refresh(creep);
-            return;
+            return false;
         }
         if (creep.memory.recover) {
             if (creep.ticksToLive < 1400) {
-                return;
+                return false;
             }
             creep.memory.recover = false;
         }
+        return true;
     },
 
     sleep: function (creep: IWorker) {
@@ -148,29 +149,54 @@ const RoleWorker = {
         let roomsToHelp = [];
         let routeToRoomsToHelp = null;
         const toHelpRoleName = `${this.roleName}s`;
-        if (Memory.needCreeps[toHelpRoleName]?.length) {
-            roomsToHelp = Memory.needCreeps[toHelpRoleName].filter((name) =>
-                Object.values(
-                    Game.map.describeExits(creep?.room.name) || []
-                ).includes(name)
+        if (
+            Memory.powerBanks.length &&
+            creep.memory.role === "harvester" &&
+            Memory.powerHuntingGroup?.length >= 3 &&
+            Memory.powerHuntingGroup?.includes(creep.name)
+        ) {
+            const roomsWithPower = Memory.powerBanks.filter(
+                (name) => Game.rooms[name]
             );
 
-            if (roomsToHelp.length) {
+            if (roomsWithPower.length) {
                 const route = Game.map.findRoute(
-                    creep?.room.name,
-                    roomsToHelp[0]
+                    creep.room.name,
+                    roomsWithPower[0]
                 );
-                routeToRoomsToHelp = creep.pos.findClosestByRange(
+                const routeToRoomsWithPower = creep.pos.findClosestByRange(
                     route[0].exit
                 );
+                creep.moveTo(routeToRoomsWithPower);
+            }
+            return true;
+        } else {
+            if (Memory.needCreeps[toHelpRoleName]?.length) {
+                roomsToHelp = Memory.needCreeps[toHelpRoleName].filter((name) =>
+                    Object.values(
+                        Game.map.describeExits(creep?.room.name) || []
+                    ).includes(name)
+                );
+
+                if (roomsToHelp.length) {
+                    const route = Game.map.findRoute(
+                        creep?.room.name,
+                        roomsToHelp[0]
+                    );
+                    routeToRoomsToHelp = creep.pos.findClosestByRange(
+                        route[0].exit
+                    );
+                }
+
+                if (routeToRoomsToHelp) {
+                    creep.moveTo(routeToRoomsToHelp, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                    return true;
+                }
             }
         }
-        if (routeToRoomsToHelp) {
-            creep.moveTo(routeToRoomsToHelp, {
-                visualizePathStyle: { stroke: "#ffffff" },
-            });
-            return true;
-        }
+
         return false;
     },
     refresh: function (creep: IWorker) {

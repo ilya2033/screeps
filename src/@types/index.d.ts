@@ -3382,6 +3382,7 @@ interface Memory {
     spawns: { [name: string]: SpawnMemory };
     needCreeps?: { upgraders: string[]; solders: string[]; builders: string[] };
     powerBanks?: string[];
+    powerHuntingGroup?: string[];
 }
 
 interface CreepMemory {

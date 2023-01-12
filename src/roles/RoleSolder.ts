@@ -20,12 +20,12 @@ const RoleSolder = {
     roleName: "",
     spawn: function (spawn: StructureSpawn, basicParts = this.basicParts) {
         let setup = this.defaultSetupT1;
-
         if (basicParts) {
             const bodyCost = basicParts.reduce(function (cost, part) {
                 return cost + BODYPART_COST[part];
             }, 0);
             let energy = spawn.room.energyAvailable;
+
             setup = [];
             while (energy >= bodyCost) {
                 setup = [...setup, ...basicParts];
@@ -75,8 +75,6 @@ const RoleSolder = {
     help: function (creep: ISolder) {
         let roomsToHelp = [];
         let routeToRoomsToHelp = null;
-        let roomsWithPower = [];
-        let routeToRoomsWithPower = null;
 
         if (!creep) {
             return;
@@ -98,54 +96,12 @@ const RoleSolder = {
                     route[0].exit
                 );
             }
-        }
-        if (routeToRoomsToHelp) {
-            creep.moveTo(routeToRoomsToHelp);
+            if (routeToRoomsToHelp) {
+                creep.moveTo(routeToRoomsToHelp);
+                return true;
+            }
         }
 
-        if (
-            (Memory.powerBanks.length && creep.memory.role === "healer") ||
-            creep.memory.role === "warrior"
-        ) {
-            roomsWithPower = Memory.powerBanks.filter((name) =>
-                Object.values(
-                    Game.map.describeExits(creep.room.name) || []
-                ).includes(name)
-            );
-            if (creep.memory.role === "healer") {
-                roomsWithPower = roomsWithPower.filter(
-                    (roomName) =>
-                        !Game.rooms[roomName].find(FIND_MY_CREEPS, {
-                            filter: (creep) => creep.memory.role !== "healer",
-                        })
-                );
-            }
-
-            if (creep.memory.role === "warrior") {
-                roomsWithPower = roomsWithPower.filter(
-                    (roomName) =>
-                        !Game.rooms[roomName].find(FIND_MY_CREEPS, {
-                            filter: (creep) => creep.memory.role !== "warrior",
-                        })
-                );
-            }
-            if (roomsWithPower.length) {
-                const route = Game.map.findRoute(
-                    creep.room.name,
-                    roomsWithPower[0]
-                );
-                routeToRoomsWithPower = creep.pos.findClosestByRange(
-                    route[0].exit
-                );
-            }
-        }
-        if (routeToRoomsToHelp) {
-            creep.moveTo(routeToRoomsToHelp);
-            return true;
-        } else if (routeToRoomsWithPower) {
-            creep.moveTo(routeToRoomsWithPower);
-            return true;
-        }
         return false;
     },
 };

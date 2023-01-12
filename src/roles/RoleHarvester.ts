@@ -1,12 +1,15 @@
 import RoleWorker from "./RoleWorker";
 import { IHarvester } from "../types/Harvester";
+import { roomPositionFC } from "../functions/roomPositionFC";
 
 const RoleHarvester = {
     ...RoleWorker,
     ...{
         roleName: "harvester",
         run: function (creep: IHarvester) {
-            this.runBasic(creep);
+            let selectedTarget: Structure | null = null;
+
+            if (!this.runBasic(creep)) return;
 
             const droppedResource = creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter: (res) => res.resourceType !== RESOURCE_ENERGY,
@@ -24,9 +27,25 @@ const RoleHarvester = {
             let checkOtherResources = Object.entries(creep.store).filter(
                 ([key, value]) => value > 1 && key !== RESOURCE_ENERGY
             ).length;
+
             if (creep.store.getFreeCapacity() && !checkOtherResources) {
                 creep.harvestEnergy();
             } else {
+                if (!creep.room.controller?.my) {
+                    const myRooms = Object.values(Game.rooms).filter(
+                        (room) => room.controller?.my && room.storage
+                    );
+
+                    const route = Game.map.findRoute(
+                        creep.room.name,
+                        myRooms[0]
+                    );
+                    const routeToMyRoom = creep.pos.findClosestByRange(
+                        route[0].exit
+                    );
+                    creep.moveTo(routeToMyRoom);
+                    return;
+                }
                 const targets: Structure[] = creep.store[RESOURCE_ENERGY]
                     ? creep.room.find(FIND_STRUCTURES, {
                           filter: (structure) => {
@@ -57,7 +76,6 @@ const RoleHarvester = {
                         );
                     },
                 });
-                let selectedTarget: Structure | null = null;
                 if (checkOtherResources && creep.room.storage) {
                     selectedTarget = creep.room.storage;
                 } else {
@@ -71,10 +89,9 @@ const RoleHarvester = {
                         if (
                             selectedTarget.structureType === STRUCTURE_STORAGE
                         ) {
-                            console.log(selectedTarget);
-
                             creep.transfer(
                                 selectedTarget,
+                                //@ts-ignore
                                 _.findKey(creep.store)
                             );
                         } else {

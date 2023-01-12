@@ -70,30 +70,41 @@ export const creepFC = () => {
                 storedSource = this.findEnergySource();
             }
         }
+        if (this.memory.role !== "track") {
+            const closestDroppedEnergy = this.pos.findClosestByPath(
+                FIND_DROPPED_RESOURCES,
+                {
+                    filter: (r: Resource) =>
+                        r.resourceType == RESOURCE_ENERGY &&
+                        r.amount > 0 &&
+                        r.pos.getOpenPositions().length,
+                }
+            );
 
-        const closestDroppedEnergy = this.pos.findClosestByPath(
-            FIND_DROPPED_RESOURCES,
-            {
-                filter: (r: Resource) =>
-                    r.resourceType == RESOURCE_ENERGY &&
-                    r.amount > 0 &&
-                    r.pos.getOpenPositions().length,
+            const closestRuinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
+                filter: (r: Ruin) =>
+                    r.pos.getOpenPositions().length &&
+                    r.store[RESOURCE_ENERGY] > 0,
+            });
+
+            const closestTombEnergy = this.pos.findClosestByPath(
+                FIND_TOMBSTONES,
+                {
+                    filter: (r: Ruin) =>
+                        r.pos.getOpenPositions().length &&
+                        r.store[RESOURCE_ENERGY] > 0,
+                }
+            );
+            if (
+                closestDroppedEnergy ||
+                closestRuinEnergy ||
+                closestTombEnergy
+            ) {
+                targets[targets.length] =
+                    closestDroppedEnergy ||
+                    closestRuinEnergy ||
+                    closestTombEnergy;
             }
-        );
-
-        const closestRuinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
-            filter: (r: Ruin) =>
-                r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
-        });
-
-        const closestTombEnergy = this.pos.findClosestByPath(FIND_TOMBSTONES, {
-            filter: (r: Ruin) =>
-                r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
-        });
-
-        if (closestDroppedEnergy || closestRuinEnergy || closestTombEnergy) {
-            targets[targets.length] =
-                closestDroppedEnergy || closestRuinEnergy || closestTombEnergy;
         }
 
         if (this.memory.role !== "harvester") {

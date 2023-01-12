@@ -1,11 +1,3 @@
-/*
- * Module code goes here. Use 'module.exports' to export things:
- * module.exports.thing = 'a thing';
- *
- * You can import it from another modules like this:
- * var mod = require('creeps.spawn');
- * mod.thing == 'a thing'; // true
- */
 import RoleArcher from "../roles/RoleArcher";
 import RoleHarvester from "../roles/RoleHarvester";
 import RoleHealer from "../roles/RoleHealer";
@@ -21,12 +13,13 @@ import { IHarvester } from "../types/Harvester";
 import { IHealer } from "../types/Healer";
 import { IUpgrader } from "../types/Upgrader";
 import { IWarrior } from "../types/Warrior";
-import { IWorker } from "../types/Worker";
 import { IClaimer } from "../types/Claimer";
 import RoleClaimer from "../roles/RoleClaimer";
 import { ITrack } from "../types/Track";
 import RoleTrack from "../roles/RoleTrack";
 import conf from "../settings";
+import { IScout } from "../types/Scout";
+import RoleScout from "../roles/RoleScout";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -37,6 +30,7 @@ interface MyCreeps {
     healers?: IHealer[];
     claimers?: IClaimer[];
     tracks?: ITrack[];
+    scouts?: IScout[];
 }
 
 const creepsSpawnScript = function () {
@@ -100,6 +94,12 @@ const creepsSpawnScript = function () {
         myCreeps.tracks = Object.values(creeps).filter(
             (creep) => creep.memory.role === "track"
         );
+        myCreeps.tracks = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "track"
+        );
+        myCreeps.scouts = Object.values(Game.creeps).filter(
+            (creep) => creep.memory.role === "scout"
+        );
 
         const isHostiles = hostiles.length;
         const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.3);
@@ -142,6 +142,9 @@ const creepsSpawnScript = function () {
             myCreeps.builders.length <= creepsPerSource &&
             myCreeps.builders.length < settings.creeps.MAX_BUILDERS;
 
+        let scoutsCondition =
+            myCreeps.scouts.length < settings.creeps.MAX_SCOUTS;
+
         if (Memory.needCreeps.builders?.length) {
             const roomsToHelp = Memory.needCreeps.builders.filter((name) =>
                 Object.values(Game.map.describeExits(room.name) || []).includes(
@@ -176,30 +179,20 @@ const creepsSpawnScript = function () {
         }
 
         if (Memory.powerBanks?.length) {
-            const roomsWithPower = Memory.powerBanks.filter((name) =>
-                Object.values(Game.map.describeExits(room.name) || []).includes(
-                    name
-                )
+            const readyRoles = (Memory.powerHuntingGroup || []).map(
+                (creep) => Game.creeps[creep].memory.role
             );
-            if (roomsWithPower.length) {
-                const roomWithPower = roomsWithPower[0];
-                if (
-                    !(
-                        Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
-                            filter: (creep) => creep.memory.role === "healer",
-                        }).length < 2
-                    )
-                ) {
-                    healersCondition = true;
-                } else {
-                    if (
-                        !Game.rooms[roomWithPower].find(FIND_MY_CREEPS, {
-                            filter: (creep) => creep.memory.role === "warrior",
-                        }).length
-                    ) {
-                        warriorsCondition = true;
-                    }
-                }
+
+            if (!readyRoles.includes("healer")) {
+                healersCondition = true;
+            }
+
+            if (!readyRoles.includes("warrior")) {
+                warriorsCondition = true;
+            }
+
+            if (!readyRoles.includes("harvester")) {
+                harvestersCondition = true;
             }
         }
 
@@ -265,6 +258,15 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleBuilder.spawn(spawn);
+                        break;
+                    }
+                }
+                break;
+
+            case scoutsCondition:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleScout.spawn(spawn);
                         break;
                     }
                 }
