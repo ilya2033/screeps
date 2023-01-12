@@ -1,1 +1,4 @@
-export interface ISolder extends Creep {}
+import { ICreep, ICreepMemory } from "./Creep";
+
+export interface ISolder extends ICreep {}
+export interface ISolderMemory extends ICreepMemory {}

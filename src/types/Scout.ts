@@ -1,5 +1,7 @@
-export interface IScoutMemory extends CreepMemory {}
+import { ICreep, ICreepMemory } from "./Creep";
 
-export interface IScout extends Creep {
+export interface IScoutMemory extends ICreepMemory {}
+
+export interface IScout extends ICreep {
     memory: IScoutMemory;
 }

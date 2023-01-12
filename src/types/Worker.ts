@@ -1,2 +1,4 @@
-export interface IWorker extends Creep {}
-export interface IWorkerMemory extends CreepMemory {}
+import { ICreep, ICreepMemory } from "./Creep";
+
+export interface IWorker extends ICreep {}
+export interface IWorkerMemory extends ICreepMemory {}

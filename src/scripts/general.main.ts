@@ -2,6 +2,7 @@ const generalScript = function () {
     if (!Memory.needCreeps) {
         Memory.needCreeps = { builders: [], upgraders: [], solders: [] };
     }
+
     if (!Memory.powerBanks) {
         Memory.powerBanks = [];
     }

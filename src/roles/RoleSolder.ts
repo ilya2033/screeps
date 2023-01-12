@@ -1,108 +1,59 @@
 import { ISolder } from "../types/Solder";
+import RoleCreep from "./RoleCreep";
 
 const RoleSolder = {
-    defaultSetupT1: [ATTACK, TOUGH, MOVE],
-    defaultSetupT2: [ATTACK, ATTACK, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE],
-    defaultSetupT3: [
-        ATTACK,
-        ATTACK,
-        ATTACK,
-        ATTACK,
-        TOUGH,
-        TOUGH,
-        TOUGH,
-        TOUGH,
-        MOVE,
-        MOVE,
-        MOVE,
-        MOVE,
-    ],
-    roleName: "",
-    spawn: function (spawn: StructureSpawn, basicParts = this.basicParts) {
-        let setup = this.defaultSetupT1;
-        if (basicParts) {
-            const bodyCost = basicParts.reduce(function (cost, part) {
-                return cost + BODYPART_COST[part];
-            }, 0);
-            let energy = spawn.room.energyAvailable;
+    ...RoleCreep,
+    ...{
+        defaultSetupT1: [ATTACK, TOUGH, MOVE],
+        defaultSetupT2: [ATTACK, ATTACK, TOUGH, TOUGH, TOUGH, MOVE, MOVE, MOVE],
+        defaultSetupT3: [
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            ATTACK,
+            TOUGH,
+            TOUGH,
+            TOUGH,
+            TOUGH,
+            MOVE,
+            MOVE,
+            MOVE,
+            MOVE,
+        ],
+        roleName: "solder",
 
-            setup = [];
-            while (energy >= bodyCost) {
-                setup = [...setup, ...basicParts];
-                energy = energy - bodyCost;
+        help: function (creep: ISolder) {
+            let roomsToHelp = [];
+            let routeToRoomsToHelp = null;
+
+            if (!creep) {
+                return;
             }
-            if (setup.length === 0) {
-                basicParts = null;
-            }
-        }
 
-        if (
-            spawn.room.energyAvailable === spawn.room.energyCapacityAvailable &&
-            !basicParts
-        ) {
-            switch (true) {
-                case spawn.room.energyAvailable >= 1200:
-                    setup = this.defaultSetupT4;
-                    break;
-                case spawn.room.energyAvailable >= 800:
-                    setup = this.defaultSetupT3;
-                    break;
-
-                case spawn.room.energyAvailable >= 550:
-                    setup = this.defaultSetupT2;
-                    break;
-            }
-        }
-
-        spawn.spawnCreep(
-            setup,
-            `${this.roleName.charAt(0).toUpperCase() + this.roleName.slice(1)}${
-                Game.time
-            }`,
-            {
-                memory: { role: this.roleName, recover: false },
-            }
-        );
-    },
-
-    sleep: function (creep: ISolder) {
-        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-        if (!this.help(creep) && spawn) {
-            creep.moveTo(spawn);
-            creep.say("NOOOOO");
-        }
-    },
-    help: function (creep: ISolder) {
-        let roomsToHelp = [];
-        let routeToRoomsToHelp = null;
-
-        if (!creep) {
-            return;
-        }
-
-        if (Memory.needCreeps.solders?.length) {
-            roomsToHelp = Memory.needCreeps.solders.filter((name) =>
-                Object.values(
-                    Game.map.describeExits(creep.room.name) || []
-                ).includes(name)
-            );
-
-            if (roomsToHelp.length) {
-                const route = Game.map.findRoute(
-                    creep.room.name,
-                    roomsToHelp[0]
+            if (Memory.needCreeps.solders?.length) {
+                roomsToHelp = Memory.needCreeps.solders.filter((name) =>
+                    Object.values(
+                        Game.map.describeExits(creep.room.name) || []
+                    ).includes(name)
                 );
-                routeToRoomsToHelp = creep.pos.findClosestByRange(
-                    route[0].exit
-                );
-            }
-            if (routeToRoomsToHelp) {
-                creep.moveTo(routeToRoomsToHelp);
-                return true;
-            }
-        }
 
-        return false;
+                if (roomsToHelp.length) {
+                    const route = Game.map.findRoute(
+                        creep.room.name,
+                        roomsToHelp[0]
+                    );
+                    routeToRoomsToHelp = creep.pos.findClosestByRange(
+                        route[0].exit
+                    );
+                }
+                if (routeToRoomsToHelp) {
+                    creep.moveTo(routeToRoomsToHelp);
+                    return true;
+                }
+            }
+
+            return false;
+        },
     },
 };
 
