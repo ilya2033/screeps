@@ -23,7 +23,10 @@ const RoleScout = {
             ).filter((roomId) => !Game.rooms[roomId]);
 
             if (unknownRooms.length) {
-                routes = Game.map.findRoute(creep.room.name, unknownRooms[0]);
+                routes = Game.map.findRoute(
+                    creep.room.name,
+                    unknownRooms[Math.random() * unknownRooms.length - 1]
+                );
             } else {
                 return;
             }
