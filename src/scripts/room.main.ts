@@ -18,6 +18,7 @@ import RoleClaimer from "../roles/RoleClaimer";
 import RoleTrack from "../roles/RoleTrack";
 import { IScout } from "../types/Scout";
 import RoleScout from "../roles/RoleScout";
+import RoleExcavator from "../roles/RoleExcavator";
 
 const roomScript = function () {
     const scoutes: IScout[] = Object.values(Game.creeps).filter(
@@ -160,8 +161,18 @@ const roomScript = function () {
             (creep) => creep.memory.role === "track"
         );
 
+        const excavators: IHealer[] = Object.values(creeps).filter(
+            (creep) => creep.memory.role === "excavator"
+        );
+
         const solders = [...warriors, ...archers, ...healers];
-        const workers = [...tracks, ...upgraders, ...builders, ...harvesters];
+        const workers = [
+            ...tracks,
+            ...upgraders,
+            ...builders,
+            ...harvesters,
+            ...excavators,
+        ];
         let towers = [];
 
         room.memory.controlUpgrader =
@@ -302,6 +313,7 @@ const roomScript = function () {
         healers.forEach((creep) => RoleHealer.run(creep));
         claimers.forEach((creep) => RoleClaimer.run(creep));
         tracks.forEach((creep) => RoleTrack.run(creep));
+        excavators.forEach((creep) => RoleExcavator.run(creep));
     });
 };
 

@@ -51,14 +51,14 @@ const RoleCreep = {
     },
 
     sleep: function (creep: ICreep) {
-        if (this.help()) {
+        if (this.help(creep)) {
             return;
         }
         const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
 
         if (!creep.pos.isNearTo(spawn)) {
-            creep.say("😴 sleep or deat..");
-            creep.moveToSpawnPoint();
+            creep.say("😴 sleep");
+            creep.moveTo(spawn);
         }
     },
     refresh: function (creep: ICreep) {

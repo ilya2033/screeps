@@ -20,6 +20,8 @@ import RoleTrack from "../roles/RoleTrack";
 import conf from "../settings";
 import { IScout } from "../types/Scout";
 import RoleScout from "../roles/RoleScout";
+import { IExcavator } from "../types/Excavator";
+import RoleExcavator from "../roles/RoleExcavator";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -31,6 +33,7 @@ interface MyCreeps {
     claimers?: IClaimer[];
     tracks?: ITrack[];
     scouts?: IScout[];
+    excavators?: IExcavator[];
 }
 
 const creepsSpawnScript = function () {
@@ -43,7 +46,9 @@ const creepsSpawnScript = function () {
     Object.values(Game.rooms).forEach((room) => {
         const creeps = room.find(FIND_MY_CREEPS);
         const spawns = room.find(FIND_MY_SPAWNS);
-
+        const extractors = room.find(FIND_STRUCTURES, {
+            filter: (st) => st.structureType === STRUCTURE_EXTRACTOR,
+        });
         const toBuild = room.find(FIND_CONSTRUCTION_SITES);
         const storages = room.find(FIND_STRUCTURES, {
             filter: (structure) =>
@@ -100,6 +105,9 @@ const creepsSpawnScript = function () {
         myCreeps.scouts = Object.values(Game.creeps).filter(
             (creep) => creep.memory.role === "scout"
         );
+        myCreeps.excavators = Object.values(Game.creeps).filter(
+            (creep) => creep.memory.role === "excavator"
+        );
 
         const isHostiles = hostiles.length;
         const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.3);
@@ -118,6 +126,8 @@ const creepsSpawnScript = function () {
                         ? settings.creeps.MAX_UPGRADERS
                         : 1));
 
+        let excavatorsCondition =
+            !isHostiles && myCreeps.excavators.length < extractors.length;
         let warriorsCondition =
             isHostiles &&
             myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
@@ -258,6 +268,15 @@ const creepsSpawnScript = function () {
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
                         RoleBuilder.spawn(spawn);
+                        break;
+                    }
+                }
+                break;
+
+            case excavatorsCondition:
+                for (const spawn of Object.values(spawns)) {
+                    if (spawn.isActive() && !spawn.spawning) {
+                        RoleExcavator.spawn(spawn);
                         break;
                     }
                 }

@@ -37,6 +37,23 @@ export const creepFC = () => {
         return null;
     };
 
+    Creep.prototype.findMineralSource = function () {
+        const sources: Mineral[] = this.room.find(FIND_MINERALS);
+
+        if (sources.length) {
+            const source = Object.values(sources).find(
+                (s) =>
+                    s.pos.getOpenPositions().length > 0 && s.mineralAmount > 0
+            );
+
+            if (source) {
+                this.memory.mineralId = source.id;
+                return source;
+            }
+        }
+        return null;
+    };
+
     Creep.prototype.findStorages = function () {
         const storages: [StructureStorage | StructureContainer] =
             this.room.find(FIND_STRUCTURES, {
@@ -150,6 +167,34 @@ export const creepFC = () => {
                 }
             } else {
                 this.moveTo(target, {
+                    visualizePathStyle: { stroke: "#ffaa00" },
+                });
+            }
+        }
+    };
+
+    Creep.prototype.harvestMinerals = function () {
+        let storedMineral = null;
+        storedMineral = <Mineral | null>(
+            Game.getObjectById(this.memory.mineralId)
+        );
+
+        if (
+            !storedMineral ||
+            (!storedMineral.pos.getOpenPositions().length &&
+                !this.pos.isNearTo(storedMineral)) ||
+            storedMineral.room.name !== this.room.name ||
+            storedMineral.mineralAmount === 0
+        ) {
+            delete this.memory.mineralId;
+            storedMineral = this.findMineralSource();
+        }
+
+        if (storedMineral) {
+            if (this.pos.isNearTo(storedMineral)) {
+                this.harvest(storedMineral);
+            } else {
+                this.moveTo(storedMineral, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
