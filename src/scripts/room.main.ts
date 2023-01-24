@@ -19,6 +19,7 @@ import RoleTrack from "../roles/RoleTrack";
 import { IScout } from "../types/Scout";
 import RoleScout from "../roles/RoleScout";
 import RoleExcavator from "../roles/RoleExcavator";
+import { checkBodyCostValidity } from "../helpers/checkBodyCostValidity";
 
 const roomScript = function () {
     const scoutes: IScout[] = Object.values(Game.creeps).filter(
@@ -184,55 +185,55 @@ const roomScript = function () {
             });
         }
 
-        room.find(FIND_MY_SPAWNS).forEach((spawn) => {
-            if (
-                !roomsWithPower.length &&
-                !hostiles.length &&
-                solders.length &&
-                !Memory.needCreeps?.solders?.length
-            ) {
-                solders.forEach((solder) => {
+        room.find(FIND_MY_SPAWNS).forEach((spawn: StructureSpawn) => {
+            if (!(spawn.store.energy < 300)) {
+                if (
+                    !roomsWithPower.length &&
+                    !hostiles.length &&
+                    solders.length &&
+                    !Memory.needCreeps?.solders?.length
+                ) {
+                    solders.forEach((solder) => {
+                        if (
+                            solder.ticksToLive < 1300 &&
+                            solder.memory.role === "healer"
+                                ? !toHeal.length
+                                : !roomsWithPower.length
+                        ) {
+                            if (spawn.pos.isNearTo(solder)) {
+                                spawn.recycleCreep(solder);
+                            }
+                        }
+                    });
+                }
+                workers.forEach((worker) => {
                     if (
-                        solder.ticksToLive < 1300 &&
-                        solder.memory.role === "healer"
-                            ? !toHeal.length
-                            : !roomsWithPower.length
+                        worker.memory.role === "builder" &&
+                        !room.find(FIND_CONSTRUCTION_SITES).length
                     ) {
-                        if (spawn.pos.isNearTo(solder)) {
-                            spawn.recycleCreep(solder);
+                        spawn.recycleCreep(worker);
+                    } else {
+                        const workerTypeCreeps = Object.values(creeps).filter(
+                            (creep) => creep.memory.role === worker.memory.role
+                        );
+
+                        if (
+                            checkBodyCostValidity(worker) &&
+                            workerTypeCreeps.length <=
+                                (conf.creeps[
+                                    `MAX_${worker.memory.role?.toUpperCase()}S`
+                                ] || Infinity)
+                        ) {
+                            if (spawn.pos.isNearTo(worker)) {
+                                spawn.renewCreep(worker);
+                            }
+                        } else {
+                            worker.ticksToLive < 200 &&
+                                spawn.recycleCreep(worker);
                         }
                     }
                 });
             }
-
-            workers.forEach((worker) => {
-                if (
-                    worker.memory.role === "builder" &&
-                    !room.find(FIND_CONSTRUCTION_SITES).length
-                ) {
-                    spawn.recycleCreep(worker);
-                } else {
-                    const workerTypeCreeps = Object.values(creeps).filter(
-                        (creep) => creep.memory.role === worker.memory.role
-                    );
-                    const cost = worker.body.reduce(function (cost, part) {
-                        return cost + BODYPART_COST[part.type];
-                    }, 0);
-                    if (
-                        cost < room.energyCapacityAvailable * 0.8 &&
-                        workerTypeCreeps.length <=
-                            (conf.creeps[
-                                `MAX_${worker.memory.role?.toUpperCase()}S`
-                            ] || Infinity)
-                    ) {
-                        if (spawn.pos.isNearTo(worker)) {
-                            spawn.renewCreep(worker);
-                        }
-                    } else {
-                        worker.ticksToLive < 200 && spawn.recycleCreep(worker);
-                    }
-                }
-            });
         });
 
         if (hostiles.length) {

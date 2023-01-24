@@ -7,6 +7,7 @@ const RoleExcavator = {
     ...{
         roleName: "excavator",
         run: function (creep: IExcavator) {
+            if (!this.runBasic(creep)) return;
             const selectedTarget = creep.room.storage;
             if (creep.store.getFreeCapacity()) {
                 creep.harvestMinerals();
