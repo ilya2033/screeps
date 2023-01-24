@@ -6,8 +6,62 @@ const RoleTrack = {
     ...{
         roleName: "track",
         basicParts: [CARRY, CARRY, MOVE],
+        runTerminal: function (creep: ITrack) {
+            if (!creep.room.terminal) {
+                return false;
+            }
+
+            let storageEntries = Object.entries(creep.room.storage.store);
+
+            if (!storageEntries.length) {
+                return false;
+            }
+
+            storageEntries.sort(
+                ([akey, avalue], [bkey, bvalue]) => bvalue - avalue
+            );
+
+            const selectedResource: {
+                key: ResourceConstant;
+                resource: number;
+            } = {
+                key: storageEntries[0][0] as ResourceConstant,
+                resource: storageEntries[0][1],
+            };
+
+            if (selectedResource.key === RESOURCE_ENERGY) {
+                return false;
+            }
+            if (!(selectedResource.resource > 25000)) {
+                return false;
+            }
+
+            if (creep.store.getFreeCapacity() > 0) {
+                if (creep.pos.isNearTo(creep.room.storage)) {
+                    creep.withdraw(creep.room.storage, selectedResource.key);
+                } else {
+                    creep.moveTo(creep.room.storage, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            } else {
+                if (creep.pos.isNearTo(creep.room.terminal)) {
+                    creep.transfer(creep.room.terminal, selectedResource.key);
+                } else {
+                    creep.moveTo(creep.room.terminal, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            }
+            return true;
+        },
         run: function (creep: ITrack) {
             if (!this.runBasic(creep)) return;
+            if (creep.name === creep.room.memory.terminalTrack) {
+                if (this.runTerminal(creep)) {
+                    return;
+                }
+            }
 
             if (creep.store.energy === 0) {
                 creep.harvestEnergy();

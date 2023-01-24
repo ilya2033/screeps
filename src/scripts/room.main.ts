@@ -179,6 +179,15 @@ const roomScript = function () {
         room.memory.controlUpgrader =
             room.controller?.pos.findClosestByPath(upgraders)?.name || null;
 
+        if (
+            room.terminal &&
+            !room.memory.terminalTrack &&
+            !creeps[room.memory.terminalTrack].length
+        ) {
+            room.memory.terminalTrack =
+                room.controller?.pos.findClosestByPath(tracks)?.name || null;
+        }
+
         if (room.memory.damagedStructures?.length || hostiles.length) {
             towers = room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_TOWER },
