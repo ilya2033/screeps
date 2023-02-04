@@ -1,3 +1,4 @@
+import { roomPositionFC } from "../functions/roomPositionFC";
 import { IWorker } from "../types/Worker";
 import RoleCreep from "./RoleCreep";
 
@@ -40,12 +41,20 @@ const RoleWorker = {
         roleName: "worker",
 
         runBasic: function (creep: IWorker) {
-            if (creep.ticksToLive < 200) {
+            if (
+                creep.ticksToLive < 200 &&
+                creep.room.energyAvailable >
+                    creep.room.energyCapacityAvailable * 0.7
+            ) {
                 this.refresh(creep);
                 return false;
             }
             if (creep.memory.recover) {
-                if (creep.ticksToLive < 1400) {
+                if (
+                    creep.ticksToLive < 1400 &&
+                    creep.room.energyAvailable >
+                        creep.room.energyCapacityAvailable * 0.7
+                ) {
                     return false;
                 }
                 creep.memory.recover = false;

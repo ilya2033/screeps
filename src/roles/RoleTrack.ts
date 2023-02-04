@@ -77,7 +77,11 @@ const RoleTrack = {
                                       structure.structureType ==
                                           STRUCTURE_LINK ||
                                       structure.structureType ==
-                                          STRUCTURE_TOWER) &&
+                                          STRUCTURE_TOWER ||
+                                      (structure.structureType ==
+                                          STRUCTURE_TERMINAL &&
+                                          structure.store[RESOURCE_ENERGY] <
+                                              10000)) &&
                                   structure.store.getFreeCapacity(
                                       RESOURCE_ENERGY
                                   ) > 0

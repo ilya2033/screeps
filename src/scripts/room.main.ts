@@ -20,6 +20,7 @@ import { IScout } from "../types/Scout";
 import RoleScout from "../roles/RoleScout";
 import RoleExcavator from "../roles/RoleExcavator";
 import { checkBodyCostValidity } from "../helpers/checkBodyCostValidity";
+import { terminalScript } from "./terminal.room";
 
 const roomScript = function () {
     const scoutes: IScout[] = Object.values(Game.creeps).filter(
@@ -29,6 +30,7 @@ const roomScript = function () {
     scoutes.forEach((creep) => RoleScout.run(creep));
 
     Object.values(Game.rooms).forEach((room) => {
+        terminalScript(room);
         const creeps = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
         const toHeal = room.find(FIND_MY_CREEPS, {
