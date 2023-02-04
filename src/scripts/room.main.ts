@@ -183,8 +183,7 @@ const roomScript = function () {
 
         if (
             room.terminal &&
-            !room.memory.terminalTrack &&
-            !creeps[room.memory.terminalTrack].length
+            (!room.memory.terminalTrack || !creeps[room.memory.terminalTrack])
         ) {
             room.memory.terminalTrack =
                 room.controller?.pos.findClosestByPath(tracks)?.name || null;
@@ -197,26 +196,26 @@ const roomScript = function () {
         }
 
         room.find(FIND_MY_SPAWNS).forEach((spawn: StructureSpawn) => {
-            if (!(spawn.store.energy < 300)) {
-                if (
-                    !roomsWithPower.length &&
-                    !hostiles.length &&
-                    solders.length &&
-                    !Memory.needCreeps?.solders?.length
-                ) {
-                    solders.forEach((solder) => {
-                        if (
-                            solder.ticksToLive < 1300 &&
-                            solder.memory.role === "healer"
-                                ? !toHeal.length
-                                : !roomsWithPower.length
-                        ) {
-                            if (spawn.pos.isNearTo(solder)) {
-                                spawn.recycleCreep(solder);
-                            }
+            if (
+                !roomsWithPower.length &&
+                !hostiles.length &&
+                solders.length &&
+                !Memory.needCreeps?.solders?.length
+            ) {
+                solders.forEach((solder) => {
+                    if (
+                        solder.ticksToLive < 1300 &&
+                        solder.memory.role === "healer"
+                            ? !toHeal.length
+                            : !roomsWithPower.length
+                    ) {
+                        if (spawn.pos.isNearTo(solder)) {
+                            spawn.recycleCreep(solder);
                         }
-                    });
-                }
+                    }
+                });
+            }
+            if (!(spawn.store.energy < 300)) {
                 workers.forEach((worker) => {
                     if (
                         worker.memory.role === "builder" &&

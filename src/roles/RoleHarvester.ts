@@ -14,7 +14,11 @@ const RoleHarvester = {
             const droppedResource = creep.room.find(FIND_DROPPED_RESOURCES, {
                 filter: (res) => res.resourceType !== RESOURCE_ENERGY,
             });
-            if (droppedResource.length && creep.room.storage) {
+            if (
+                droppedResource.length &&
+                creep.room.storage &&
+                creep.store.getFreeCapacity() > 1
+            ) {
                 const selectedResourse =
                     creep.pos.findClosestByPath(droppedResource);
                 if (creep.pickup(selectedResourse) == ERR_NOT_IN_RANGE) {
@@ -92,7 +96,9 @@ const RoleHarvester = {
                             creep.transfer(
                                 selectedTarget,
                                 //@ts-ignore
-                                _.findKey(creep.store)
+                                _.findKey(creep.store),
+                                //@ts-ignore
+                                creep.store[_.findKey(creep.store)]
                             );
                         } else {
                             creep.transfer(selectedTarget, RESOURCE_ENERGY);

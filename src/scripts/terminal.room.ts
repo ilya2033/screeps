@@ -17,10 +17,10 @@ const terminalScript = function (room: Room) {
                     order.resourceType == resourceName &&
                     order.type == ORDER_BUY &&
                     Game.market.calcTransactionCost(
-                        200,
+                        1000,
                         room.name,
                         order.roomName
-                    ) < 400
+                    ) < 2000
             );
             console.log("Buy orders found: " + orders.length);
             orders.sort(function (a, b) {
@@ -30,7 +30,7 @@ const terminalScript = function (room: Room) {
             console.log("Best price: " + orders[0].price);
 
             if (orders[0].price > 0.7) {
-                const result = Game.market.deal(orders[0].id, 200, room.name);
+                const result = Game.market.deal(orders[0].id, 1000, room.name);
                 if (result == 0) {
                     console.log("Order completed successfully");
                 }
