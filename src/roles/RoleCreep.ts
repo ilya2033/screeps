@@ -1,7 +1,30 @@
+import { createProject } from "../../node_modules/gulp-typescript/release/main";
 import { ICreep } from "../types/Creep";
 
 const RoleCreep = {
     roleName: "",
+
+    record(creep: ICreep) {
+        if (
+            !creep.memory.oldPosition ||
+            creep.memory.oldPosition.x !== creep.pos.x ||
+            creep.memory.oldPosition.y !== creep.pos.y
+        ) {
+            const roadIndex = creep.room.memory.roads?.findIndex(
+                (road) => road.x === creep.pos.x && road.y === creep.pos.y
+            );
+            if (roadIndex >= 0) {
+                creep.room.memory.roads[roadIndex].count++;
+            } else {
+                creep.room.memory.roads.push({
+                    x: creep.pos.x,
+                    y: creep.pos.y,
+                    count: 1,
+                });
+            }
+        }
+        creep.memory.oldPosition = { x: creep.pos.x, y: creep.pos.y };
+    },
 
     spawn: function (spawn, basicParts = this.basicParts) {
         let setup = this.defaultSetupT1;

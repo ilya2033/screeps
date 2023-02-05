@@ -41,6 +41,7 @@ const RoleWorker = {
         roleName: "worker",
 
         runBasic: function (creep: IWorker) {
+            this.record(creep);
             if (
                 creep.ticksToLive < 200 &&
                 creep.room.energyAvailable >

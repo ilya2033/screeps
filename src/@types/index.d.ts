@@ -3394,6 +3394,7 @@ interface CreepMemory {
 interface FlagMemory {}
 interface PowerCreepMemory {}
 interface RoomMemory {
+    roads?: { x: number; y: number; count: number }[];
     terminalTrack?: string;
     controlUpgrader?: string;
     damagedStructures?: Id<Structure>[];

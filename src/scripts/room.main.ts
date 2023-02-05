@@ -30,6 +30,9 @@ const roomScript = function () {
     scoutes.forEach((creep) => RoleScout.run(creep));
 
     Object.values(Game.rooms).forEach((room) => {
+        if (!room.memory.roads) {
+            room.memory.roads = [];
+        }
         terminalScript(room);
         const creeps = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
