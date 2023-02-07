@@ -21,20 +21,20 @@ import RoleScout from "../roles/RoleScout";
 import RoleExcavator from "../roles/RoleExcavator";
 import { checkBodyCostValidity } from "../helpers/checkBodyCostValidity";
 import { terminalScript } from "./terminal.room";
+import { ICreep } from "../types/Creep";
+import { checkNearRoomsScript } from "./checkNearRooms.rooms";
 
 const roomScript = function () {
-    const scoutes: IScout[] = Object.values(Game.creeps).filter(
-        (creep) => creep.memory.role === "scout"
-    );
-
-    scoutes.forEach((creep) => RoleScout.run(creep));
-
     Object.values(Game.rooms).forEach((room) => {
         if (!room.memory.roads) {
             room.memory.roads = [];
         }
+        if (!room.memory.nearRooms) {
+            room.memory.nearRooms = [];
+        }
         terminalScript(room);
-        const creeps = room.find(FIND_MY_CREEPS);
+        checkNearRoomsScript(room);
+        const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
         const toHeal = room.find(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax,
@@ -259,6 +259,21 @@ const roomScript = function () {
             }
         } else {
         }
+
+        // if (room.find(FIND_CONSTRUCTION_SITES) && !room.controller?.my) {
+        //     if (builders.length < 2) {
+        //         if (!Memory.needCreeps.builders.includes(room.name)) {
+        //             Memory.needCreeps.builders = [
+        //                 ...(Memory.needCreeps.builders || []),
+        //                 room.name,
+        //             ];
+        //         }
+        //     } else {
+        //         Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
+        //             (name) => name !== room.name
+        //         );
+        //     }
+        // }
 
         if (room.controller?.my) {
             if (!room.find(FIND_MY_SPAWNS).length) {

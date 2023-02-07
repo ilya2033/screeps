@@ -1,6 +1,8 @@
+import { ICreep } from "../types/Creep";
+
 const powerHuntingScript = function () {
     const readyRoles = (Memory.powerHuntingGroup || []).map(
-        (creep) => Game.creeps[creep].memory.role
+        (creep) => (Game.creeps[creep] as ICreep).memory.role
     );
 
     Memory.powerHuntingGroup = (Memory.powerHuntingGroup || []).filter(
@@ -14,7 +16,7 @@ const powerHuntingScript = function () {
         if (!readyRoles.includes("healer")) {
             const creep =
                 Object.values(Game.creeps).filter(
-                    (creep) => creep.memory.role === "healer"
+                    (creep: ICreep) => creep.memory.role === "healer"
                 )[0] || null;
 
             if (creep) {
@@ -30,7 +32,7 @@ const powerHuntingScript = function () {
         if (!readyRoles.includes("harvester")) {
             const creep =
                 Object.values(Game.creeps).filter(
-                    (creep) => creep.memory.role === "harvester"
+                    (creep: ICreep) => creep.memory.role === "harvester"
                 )[0] || null;
 
             if (creep) {
@@ -45,7 +47,7 @@ const powerHuntingScript = function () {
         if (!readyRoles.includes("warrior")) {
             const creep =
                 Object.values(Game.creeps).filter(
-                    (creep) => creep.memory.role === "warrior"
+                    (creep: ICreep) => creep.memory.role === "warrior"
                 )[0] || null;
 
             if (creep) {

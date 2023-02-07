@@ -22,6 +22,7 @@ import { IScout } from "../types/Scout";
 import RoleScout from "../roles/RoleScout";
 import { IExcavator } from "../types/Excavator";
 import RoleExcavator from "../roles/RoleExcavator";
+import { ICreep } from "../types/Creep";
 
 interface MyCreeps {
     harvesters?: IHarvester[];
@@ -44,7 +45,7 @@ const creepsSpawnScript = function () {
     }
 
     Object.values(Game.rooms).forEach((room) => {
-        const creeps = room.find(FIND_MY_CREEPS);
+        const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const spawns = room.find(FIND_MY_SPAWNS);
         const extractors = room.find(FIND_STRUCTURES, {
             filter: (st) => st.structureType === STRUCTURE_EXTRACTOR,
@@ -73,44 +74,70 @@ const creepsSpawnScript = function () {
         let myCreeps: MyCreeps = {};
 
         myCreeps.harvesters = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "harvester"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "harvester"
         );
         myCreeps.builders = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "builder"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "builder"
         );
         myCreeps.upgraders = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "upgrader"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "upgrader"
         );
         myCreeps.warriors = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "warrior"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "warrior"
         );
         myCreeps.archers = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "archer"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "archer"
         );
 
         myCreeps.healers = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "healer"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "healer"
         );
 
         myCreeps.claimers = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "claimer"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "claimer"
         );
 
         myCreeps.tracks = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "track"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "track"
         );
         myCreeps.tracks = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "track"
+            (creep) =>
+                creep.memory.spawnRoom === room.name &&
+                creep.memory.role === "track"
         );
-        myCreeps.scouts = Object.values(Game.creeps).filter(
-            (creep) => creep.memory.role === "scout"
+        myCreeps.scouts = <ICreep[]>(
+            Object.values(Game.creeps).filter(
+                (creep: ICreep) =>
+                    creep.memory.spawnRoom === room.name &&
+                    creep.memory.role === "scout"
+            )
         );
-        myCreeps.excavators = Object.values(Game.creeps).filter(
-            (creep) => creep.memory.role === "excavator"
+        myCreeps.excavators = <ICreep[]>(
+            Object.values(Game.creeps).filter(
+                (creep: ICreep) =>
+                    creep.memory.spawnRoom === room.name &&
+                    creep.memory.role === "excavator"
+            )
         );
 
         const isHostiles = hostiles.length;
-        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.3);
+        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.4);
 
         let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&
@@ -188,23 +215,23 @@ const creepsSpawnScript = function () {
             }
         }
 
-        if (Memory.powerBanks?.length) {
-            const readyRoles = (Memory.powerHuntingGroup || []).map(
-                (creep) => Game.creeps[creep].memory.role
-            );
+        // if (Memory.powerBanks?.length) {
+        //     const readyRoles = (Memory.powerHuntingGroup || []).map(
+        //         (creep) => Game.creeps[creep].memory.role
+        //     );
 
-            if (!readyRoles.includes("healer")) {
-                healersCondition = true;
-            }
+        //     if (!readyRoles.includes("healer")) {
+        //         healersCondition = true;
+        //     }
 
-            if (!readyRoles.includes("warrior")) {
-                warriorsCondition = true;
-            }
+        //     if (!readyRoles.includes("warrior")) {
+        //         warriorsCondition = true;
+        //     }
 
-            if (!readyRoles.includes("harvester")) {
-                harvestersCondition = true;
-            }
-        }
+        //     if (!readyRoles.includes("harvester")) {
+        //         harvestersCondition = true;
+        //     }
+        // }
 
         switch (true) {
             case harvestersCondition:

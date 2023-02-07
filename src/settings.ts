@@ -19,7 +19,7 @@ const conf = {
     },
     creeps: {
         MAX_WARRIORS: 2,
-        MAX_HARVESTERS: 2,
+        MAX_HARVESTERS: 4,
         MAX_ARCHERS: 3,
         MAX_BUILDERS: 1,
         MAX_UPGRADERS: 2,

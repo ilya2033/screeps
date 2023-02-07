@@ -1096,9 +1096,9 @@ declare const ConstructionSite: ConstructionSiteConstructor;
  */
 interface Creep extends RoomObject {
     readonly prototype: Creep;
-    harvestEnergy: () => void;
+    harvestEnergy: () => boolean;
     harvestMinerals: () => void;
-    run: (creep: Creep) => void;
+    run: (creep: Creep, ...args: any) => void;
     findMineralSource: () => Mineral | null;
     findEnergySource: () => Source | null;
     findPowerBank: () => StructurePowerBank | null;
@@ -3387,13 +3387,15 @@ interface Memory {
     powerHuntingGroup?: string[];
 }
 
-interface CreepMemory {
-    role: string;
-    recover: boolean;
-}
+interface CreepMemory {}
 interface FlagMemory {}
 interface PowerCreepMemory {}
 interface RoomMemory {
+    nearRooms?: string[];
+
+    owner?: boolean;
+    controller?: boolean;
+    lastChecked?: number;
     roads?: { x: number; y: number; count: number }[];
     terminalTrack?: string;
     controlUpgrader?: string;

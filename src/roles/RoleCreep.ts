@@ -1,10 +1,47 @@
-import { createProject } from "../../node_modules/gulp-typescript/release/main";
 import { ICreep } from "../types/Creep";
 
 const RoleCreep = {
     roleName: "",
+    recordRoom: (creep: ICreep) => {
+        const room = creep.room;
+        Memory.rooms[room.name] = {
+            ...Memory.rooms[room.name],
+            ...{
+                owner: !!room.controller?.owner,
+                controller: !!room.controller,
+                lastChecked: Game.time,
+            },
+        };
+    },
 
-    record(creep: ICreep) {
+    harvestFromOtherRooms: function (creep: ICreep) {
+        const rooms = creep.room.memory.nearRooms
+            .filter(
+                (roomName) =>
+                    !Memory.rooms[roomName]?.owner &&
+                    Memory.rooms[roomName]?.controller
+            )
+            .filter((roomName) =>
+                Game.rooms[roomName]
+                    ? Game.rooms[roomName]
+                          .find(FIND_SOURCES)
+                          .some((source) => source.pos.getOpenPositions())
+                    : true
+            );
+
+        if (rooms.length) {
+            const routes = Game.map.findRoute(creep.room.name, rooms[0]);
+
+            const closestRoute = creep.pos.findClosestByRange(routes[0]?.exit);
+            if (closestRoute) {
+                creep.moveTo(closestRoute);
+            }
+        }
+    },
+    recordMove(creep: ICreep) {
+        if (!creep.room.memory.roads) {
+            creep.room.memory.roads = [];
+        }
         if (
             !creep.memory.oldPosition ||
             creep.memory.oldPosition.x !== creep.pos.x ||
@@ -68,7 +105,11 @@ const RoleCreep = {
                 Game.time
             }`,
             {
-                memory: { role: this.roleName, recover: false },
+                memory: {
+                    role: this.roleName,
+                    recover: false,
+                    spawnRoom: spawn.room.name,
+                },
             }
         );
     },
@@ -89,11 +130,18 @@ const RoleCreep = {
         if (spawn) {
             creep.moveTo(spawn);
             creep.memory.recover = true;
-
-            return true;
+        } else {
+            this.moveHome(creep);
         }
+        return true;
+    },
+    moveHome: function (creep: ICreep) {
+        const myRoom = creep.memory.spawnRoom;
 
-        return false;
+        const route = Game.map.findRoute(creep.room.name, myRoom);
+        const routeToMyRoom = creep.pos.findClosestByRange(route[0].exit);
+        creep.moveTo(routeToMyRoom);
+        return true;
     },
 };
 

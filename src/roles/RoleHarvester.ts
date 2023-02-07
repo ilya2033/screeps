@@ -6,6 +6,7 @@ const RoleHarvester = {
     ...RoleWorker,
     ...{
         roleName: "harvester",
+
         run: function (creep: IHarvester) {
             let selectedTarget: Structure | null = null;
 
@@ -33,22 +34,13 @@ const RoleHarvester = {
             ).length;
 
             if (creep.store.getFreeCapacity() && !checkOtherResources) {
-                creep.harvestEnergy();
+                if (!creep.harvestEnergy()) {
+                    this.harvestFromOtherRooms(creep);
+                    return;
+                }
             } else {
                 if (!creep.room.controller?.my) {
-                    const myRooms = Object.values(Game.rooms).filter(
-                        (room) => room.controller?.my && room.storage
-                    );
-
-                    const route = Game.map.findRoute(
-                        creep.room.name,
-                        myRooms[0]
-                    );
-                    const routeToMyRoom = creep.pos.findClosestByRange(
-                        route[0].exit
-                    );
-                    creep.moveTo(routeToMyRoom);
-                    return;
+                    this.moveHome(creep);
                 }
                 const targets: Structure[] = creep.store[RESOURCE_ENERGY]
                     ? creep.room.find(FIND_STRUCTURES, {

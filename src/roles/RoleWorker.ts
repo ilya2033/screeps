@@ -41,7 +41,8 @@ const RoleWorker = {
         roleName: "worker",
 
         runBasic: function (creep: IWorker) {
-            this.record(creep);
+            this.recordMove(creep);
+            this.recordRoom(creep);
             if (
                 creep.ticksToLive < 200 &&
                 creep.room.energyAvailable >
@@ -64,7 +65,7 @@ const RoleWorker = {
         },
 
         upgrade: function (creep: IWorker) {
-            if (creep.room.controller) {
+            if (creep.room.controller && creep.room.controller.my) {
                 if (
                     creep.upgradeController(creep.room.controller) ==
                     ERR_NOT_IN_RANGE

@@ -170,7 +170,9 @@ export const creepFC = () => {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
+            return true;
         }
+        return false;
     };
 
     Creep.prototype.harvestMinerals = function () {
