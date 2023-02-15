@@ -15,7 +15,7 @@ const RoleCreep = {
     },
 
     harvestFromOtherRooms: function (creep: ICreep) {
-        const rooms = creep.room.memory.nearRooms
+        let rooms = creep.room.memory.nearRooms
             .filter(
                 (roomName) =>
                     !Memory.rooms[roomName]?.owner &&
@@ -28,6 +28,34 @@ const RoleCreep = {
                           .some((source) => source.pos.getOpenPositions())
                     : true
             );
+        if (!rooms.length) {
+            rooms = creep.room.memory.nearRooms
+                .reduce((acc, roomName) => {
+                    const nearRooms = Memory.rooms[roomName]?.nearRooms;
+                    if (nearRooms?.length) {
+                        return [...acc, ...nearRooms];
+                    }
+                    if (creep.room.name === "E31N27") {
+                        console.log(acc);
+                    }
+                }, [])
+                .filter(
+                    (roomName) =>
+                        !Memory.rooms[roomName]?.owner &&
+                        Memory.rooms[roomName]?.controller
+                )
+                .filter((roomName) =>
+                    Game.rooms[roomName]
+                        ? Game.rooms[roomName]
+                              .find(FIND_SOURCES)
+                              .some((source) => source.pos.getOpenPositions())
+                        : true
+                );
+
+            if (creep.room.name === "E31N27") {
+                console.log(rooms);
+            }
+        }
 
         if (rooms.length) {
             const routes = Game.map.findRoute(creep.room.name, rooms[0]);

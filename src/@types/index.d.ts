@@ -3392,6 +3392,8 @@ interface FlagMemory {}
 interface PowerCreepMemory {}
 interface RoomMemory {
     nearRooms?: string[];
+    attackTimer?: number | null;
+    attacked?: boolean;
 
     owner?: boolean;
     controller?: boolean;

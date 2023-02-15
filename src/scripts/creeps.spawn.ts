@@ -68,7 +68,9 @@ const creepsSpawnScript = function () {
             (prev, s: Source) => prev + s.pos.getWalkablePositions().length,
             0
         );
-        const hostiles = room.find(FIND_HOSTILE_CREEPS);
+
+        const attacked = room.memory.attacked;
+
         const safeMode = room.controller?.safeMode;
 
         let myCreeps: MyCreeps = {};
@@ -136,7 +138,6 @@ const creepsSpawnScript = function () {
             )
         );
 
-        const isHostiles = hostiles.length;
         const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.4);
 
         let claimersCondition =
@@ -154,16 +155,15 @@ const creepsSpawnScript = function () {
                         : 1));
 
         let excavatorsCondition =
-            !isHostiles && myCreeps.excavators.length < extractors.length;
+            !attacked && myCreeps.excavators.length < extractors.length;
         let warriorsCondition =
-            isHostiles &&
-            myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
+            attacked && myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
 
         let archersCondition =
-            isHostiles && myCreeps.archers.length < settings.creeps.MAX_ARCHERS;
+            attacked && myCreeps.archers.length < settings.creeps.MAX_ARCHERS;
 
         let healersCondition =
-            (isHostiles &&
+            (attacked &&
                 myCreeps.healers.length < settings.creeps.MAX_HEALERS) ||
             toHeal.length;
 
@@ -174,7 +174,7 @@ const creepsSpawnScript = function () {
         );
 
         let buildersCondition =
-            !isHostiles &&
+            !attacked &&
             toBuild.length &&
             myCreeps.builders.length <= creepsPerSource &&
             myCreeps.builders.length < settings.creeps.MAX_BUILDERS;
@@ -195,7 +195,7 @@ const creepsSpawnScript = function () {
             }
         }
 
-        if (Memory.needCreeps.solders?.length && !isHostiles) {
+        if (Memory.needCreeps.solders?.length && !attacked) {
             const roomsToHelp = Memory.needCreeps.solders.filter((name) =>
                 Object.values(Game.map.describeExits(room.name) || []).includes(
                     name

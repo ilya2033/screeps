@@ -23,6 +23,7 @@ import { terminalScript } from "./terminal.room";
 import { ICreep } from "../types/Creep";
 import { checkNearRoomsScript } from "./checkNearRooms.rooms";
 import { roadScript } from "./room.roads";
+import { attackTimerScript } from "./attackTimer.room";
 
 const roomScript = function () {
     Object.values(Game.rooms).forEach((room) => {
@@ -32,11 +33,12 @@ const roomScript = function () {
         if (!room.memory.nearRooms) {
             room.memory.nearRooms = [];
         }
+        attackTimerScript(room);
         terminalScript(room);
         roadScript(room);
         checkNearRoomsScript(room);
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
-        const hostiles = room.find(FIND_HOSTILE_CREEPS);
+        const attacked = room.memory.attacked;
         const toHeal = room.find(FIND_MY_CREEPS, {
             filter: (creep) => creep.hits < creep.hitsMax,
         });
@@ -193,7 +195,7 @@ const roomScript = function () {
                 room.controller?.pos.findClosestByPath(tracks)?.name || null;
         }
 
-        if (room.memory.damagedStructures?.length || hostiles.length) {
+        if (room.memory.damagedStructures?.length || attacked) {
             towers = room.find(FIND_MY_STRUCTURES, {
                 filter: { structureType: STRUCTURE_TOWER },
             });
@@ -202,7 +204,7 @@ const roomScript = function () {
         room.find(FIND_MY_SPAWNS).forEach((spawn: StructureSpawn) => {
             if (
                 !roomsWithPower.length &&
-                !hostiles.length &&
+                !attacked &&
                 solders.length &&
                 !Memory.needCreeps?.solders?.length
             ) {
@@ -251,7 +253,7 @@ const roomScript = function () {
             }
         });
 
-        if (hostiles.length) {
+        if (attacked) {
             const spawn = room.find(FIND_MY_SPAWNS)[0];
             if (
                 (spawn && spawn.hits < spawn.hitsMax) ||
@@ -308,7 +310,7 @@ const roomScript = function () {
             }
 
             if (
-                hostiles.length &&
+                attacked &&
                 warriors.length + healers.length + archers.length < 3
             ) {
                 if (!Memory.needCreeps.solders.includes(room.name)) {
