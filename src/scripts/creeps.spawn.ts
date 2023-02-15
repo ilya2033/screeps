@@ -50,6 +50,7 @@ const creepsSpawnScript = function () {
         const extractors = room.find(FIND_STRUCTURES, {
             filter: (st) => st.structureType === STRUCTURE_EXTRACTOR,
         });
+        const minerals = room.find(FIND_MINERALS);
         const toBuild = room.find(FIND_CONSTRUCTION_SITES);
         const storages = room.find(FIND_STRUCTURES, {
             filter: (structure) =>
@@ -155,7 +156,9 @@ const creepsSpawnScript = function () {
                         : 1));
 
         let excavatorsCondition =
-            !attacked && myCreeps.excavators.length < extractors.length;
+            !attacked &&
+            myCreeps.excavators.length < extractors.length &&
+            minerals.some((mineral) => mineral.mineralAmount > 0);
         let warriorsCondition =
             attacked && myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
 

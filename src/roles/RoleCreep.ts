@@ -33,11 +33,10 @@ const RoleCreep = {
                 .reduce((acc, roomName) => {
                     const nearRooms = Memory.rooms[roomName]?.nearRooms;
                     if (nearRooms?.length) {
-                        return [...acc, ...nearRooms];
+                        console.log({ acc, nearRooms });
+                        return [...new Set([...acc, ...nearRooms])];
                     }
-                    if (creep.room.name === "E31N27") {
-                        console.log(acc);
-                    }
+                    return acc;
                 }, [])
                 .filter(
                     (roomName) =>
@@ -51,10 +50,6 @@ const RoleCreep = {
                               .some((source) => source.pos.getOpenPositions())
                         : true
                 );
-
-            if (creep.room.name === "E31N27") {
-                console.log(rooms);
-            }
         }
 
         if (rooms.length) {
