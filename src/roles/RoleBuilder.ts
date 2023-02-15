@@ -28,9 +28,7 @@ const RoleBuilder = {
                             });
                         }
                     } else {
-                        if (!this.repair(creep)) {
-                            this.sleep(creep);
-                        }
+                        this.sleep(creep);
                     }
                 }
             } else {

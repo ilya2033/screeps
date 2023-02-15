@@ -229,6 +229,13 @@ const roomScript = function () {
                         !Memory.needCreeps.builders?.length
                     ) {
                         spawn.recycleCreep(worker);
+                    } else if (
+                        worker.memory.role === "excavator" &&
+                        !room
+                            .find(FIND_MINERALS)
+                            .some((mineral) => mineral.mineralAmount > 0)
+                    ) {
+                        spawn.recycleCreep(worker);
                     } else {
                         const workerTypeCreeps = Object.values(creeps).filter(
                             (creep) => creep.memory.role === worker.memory.role
