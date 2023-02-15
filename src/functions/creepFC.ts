@@ -10,6 +10,19 @@ export const creepFC = () => {
             if (source) {
                 this.memory.sourceId = source.id;
                 return source;
+            } else {
+                const isNear = Object.values(sources).find(
+                    (s) =>
+                        s.pos.getOpenPositions().length === 0 &&
+                        s.energy > 0 &&
+                        this.pos.isNearTo(s)
+                );
+                if (isNear) {
+                    const openPositions = this.pos.getOpenPositions();
+                    if (openPositions?.length) {
+                        this.moveTo(openPositions[0]);
+                    }
+                }
             }
         }
         return null;
@@ -71,6 +84,7 @@ export const creepFC = () => {
     Creep.prototype.harvestEnergy = function () {
         let targets = [];
         let storedSource = null;
+
         if (this.memory.role !== "track") {
             storedSource = <Source | null>(
                 Game.getObjectById(this.memory.sourceId)

@@ -34,7 +34,7 @@ export const checkNearRoomsScript = (room: Room) => {
             const spawns = room.find(FIND_MY_SPAWNS);
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
-                    RoleScout.spawn(spawn);
+                    // RoleScout.spawn(spawn);
                     break;
                 }
             }

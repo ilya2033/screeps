@@ -309,14 +309,14 @@ const creepsSpawnScript = function () {
                 }
                 break;
 
-            case scoutsCondition:
-                for (const spawn of Object.values(spawns)) {
-                    if (spawn.isActive() && !spawn.spawning) {
-                        RoleScout.spawn(spawn);
-                        break;
-                    }
-                }
-                break;
+            // case scoutsCondition:
+            //     for (const spawn of Object.values(spawns)) {
+            //         if (spawn.isActive() && !spawn.spawning) {
+            //             RoleScout.spawn(spawn);
+            //             break;
+            //         }
+            //     }
+            //     break;
         }
     });
 };

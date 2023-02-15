@@ -16,13 +16,13 @@ import { IHealer } from "../types/Healer";
 import conf from "../settings";
 import RoleClaimer from "../roles/RoleClaimer";
 import RoleTrack from "../roles/RoleTrack";
-import { IScout } from "../types/Scout";
-import RoleScout from "../roles/RoleScout";
+
 import RoleExcavator from "../roles/RoleExcavator";
 import { checkBodyCostValidity } from "../helpers/checkBodyCostValidity";
 import { terminalScript } from "./terminal.room";
 import { ICreep } from "../types/Creep";
 import { checkNearRoomsScript } from "./checkNearRooms.rooms";
+import { roadScript } from "./room.roads";
 
 const roomScript = function () {
     Object.values(Game.rooms).forEach((room) => {
@@ -33,6 +33,7 @@ const roomScript = function () {
             room.memory.nearRooms = [];
         }
         terminalScript(room);
+        roadScript(room);
         checkNearRoomsScript(room);
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const hostiles = room.find(FIND_HOSTILE_CREEPS);
@@ -222,7 +223,8 @@ const roomScript = function () {
                 workers.forEach((worker) => {
                     if (
                         worker.memory.role === "builder" &&
-                        !room.find(FIND_CONSTRUCTION_SITES).length
+                        !room.find(FIND_CONSTRUCTION_SITES).length &&
+                        !Memory.needCreeps.builders?.length
                     ) {
                         spawn.recycleCreep(worker);
                     } else {
@@ -260,37 +262,31 @@ const roomScript = function () {
         } else {
         }
 
-        // if (room.find(FIND_CONSTRUCTION_SITES) && !room.controller?.my) {
-        //     if (builders.length < 2) {
-        //         if (!Memory.needCreeps.builders.includes(room.name)) {
-        //             Memory.needCreeps.builders = [
-        //                 ...(Memory.needCreeps.builders || []),
-        //                 room.name,
-        //             ];
-        //         }
-        //     } else {
-        //         Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
-        //             (name) => name !== room.name
-        //         );
-        //     }
-        // }
+        if (
+            room.find(FIND_CONSTRUCTION_SITES)?.length &&
+            room.controller &&
+            (!room.controller?.owner || room.controller?.my)
+        ) {
+            if (builders.length < 2) {
+                if (!Memory.needCreeps.builders.includes(room.name)) {
+                    Memory.needCreeps.builders = [
+                        ...(Memory.needCreeps.builders || []),
+                        room.name,
+                    ];
+                }
+            } else {
+                Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
+                    (name) => name !== room.name
+                );
+            }
+        } else {
+            Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
+                (name) => name !== room.name
+            );
+        }
 
         if (room.controller?.my) {
             if (!room.find(FIND_MY_SPAWNS).length) {
-                if (builders.length < 2) {
-                    if (!Memory.needCreeps.builders.includes(room.name)) {
-                        Memory.needCreeps.builders = [
-                            ...(Memory.needCreeps.builders || []),
-                            room.name,
-                        ];
-                    }
-                } else {
-                    Memory.needCreeps.builders =
-                        Memory.needCreeps.builders.filter(
-                            (name) => name !== room.name
-                        );
-                }
-
                 if (!upgraders.length) {
                     if (!Memory.needCreeps.upgraders.includes(room.name)) {
                         Memory.needCreeps.upgraders = [
@@ -305,9 +301,6 @@ const roomScript = function () {
                         );
                 }
             } else {
-                Memory.needCreeps.builders = Memory.needCreeps.builders.filter(
-                    (name) => name !== room.name
-                );
                 Memory.needCreeps.upgraders =
                     Memory.needCreeps.upgraders.filter(
                         (name) => name !== room.name

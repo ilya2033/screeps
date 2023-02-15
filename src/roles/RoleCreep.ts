@@ -109,6 +109,7 @@ const RoleCreep = {
                     role: this.roleName,
                     recover: false,
                     spawnRoom: spawn.room.name,
+                    recycle: false,
                 },
             }
         );
@@ -119,10 +120,13 @@ const RoleCreep = {
             return;
         }
         const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
-
-        if (!creep.pos.isNearTo(spawn)) {
-            creep.say("😴 sleep");
-            creep.moveTo(spawn);
+        if (!spawn) {
+            this.moveHome(creep);
+        } else {
+            if (!creep.pos.isNearTo(spawn)) {
+                creep.say("😴 sleep");
+                creep.moveTo(spawn);
+            }
         }
     },
     refresh: function (creep: ICreep) {

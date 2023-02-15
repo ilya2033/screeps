@@ -6,4 +6,5 @@ export interface ICreepMemory extends CreepMemory {
     recover: boolean;
     oldPosition: { x: number; y: number };
     spawnRoom: string;
+    recycle: boolean;
 }
