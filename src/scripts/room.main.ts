@@ -24,6 +24,7 @@ import { ICreep } from "../types/Creep";
 import { checkNearRoomsScript } from "./checkNearRooms.rooms";
 import { roadScript } from "./room.roads";
 import { attackTimerScript } from "./attackTimer.room";
+import { recycleCreepsScript } from "./recycleCreeps.room";
 
 const roomScript = function () {
     Object.values(Game.rooms).forEach((room) => {
@@ -37,6 +38,7 @@ const roomScript = function () {
         terminalScript(room);
         roadScript(room);
         checkNearRoomsScript(room);
+        recycleCreepsScript(room);
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const attacked = room.memory.attacked;
         const toHeal = room.find(FIND_MY_CREEPS, {
@@ -174,14 +176,6 @@ const roomScript = function () {
             (creep) => creep.memory.role === "excavator"
         );
 
-        const solders = [...warriors, ...archers, ...healers];
-        const workers = [
-            ...tracks,
-            ...upgraders,
-            ...builders,
-            ...harvesters,
-            ...excavators,
-        ];
         let towers = [];
 
         room.memory.controlUpgrader =
@@ -200,66 +194,6 @@ const roomScript = function () {
                 filter: { structureType: STRUCTURE_TOWER },
             });
         }
-
-        room.find(FIND_MY_SPAWNS).forEach((spawn: StructureSpawn) => {
-            if (
-                !roomsWithPower.length &&
-                !attacked &&
-                solders.length &&
-                !Memory.needCreeps?.solders?.length
-            ) {
-                solders.forEach((solder) => {
-                    if (
-                        solder.ticksToLive < 1300 &&
-                        solder.memory.role === "healer"
-                            ? !toHeal.length
-                            : !roomsWithPower.length
-                    ) {
-                        if (spawn.pos.isNearTo(solder)) {
-                            spawn.recycleCreep(solder);
-                        }
-                    }
-                });
-            }
-            if (!(spawn.store.energy < 300)) {
-                workers.forEach((worker) => {
-                    if (
-                        worker.memory.role === "builder" &&
-                        !room.find(FIND_CONSTRUCTION_SITES).length &&
-                        !Memory.needCreeps.builders?.length
-                    ) {
-                        spawn.recycleCreep(worker);
-                    } else if (
-                        worker.memory.role === "excavator" &&
-                        !room
-                            .find(FIND_MINERALS)
-                            .some((mineral) => mineral.mineralAmount > 0)
-                    ) {
-                        spawn.recycleCreep(worker);
-                    } else {
-                        const workerTypeCreeps = Object.values(creeps).filter(
-                            (creep) => creep.memory.role === worker.memory.role
-                        );
-
-                        if (
-                            checkBodyCostValidity(worker) &&
-                            workerTypeCreeps.length <=
-                                (conf.creeps[
-                                    `MAX_${worker.memory.role?.toUpperCase()}S`
-                                ] || Infinity)
-                        ) {
-                            if (spawn.pos.isNearTo(worker)) {
-                                spawn.renewCreep(worker);
-                            }
-                        } else {
-                            worker.ticksToLive < 200 &&
-                                spawn.recycleCreep(worker);
-                        }
-                    }
-                });
-            }
-        });
-
         if (attacked) {
             const spawn = room.find(FIND_MY_SPAWNS)[0];
             if (

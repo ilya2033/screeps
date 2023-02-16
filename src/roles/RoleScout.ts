@@ -48,6 +48,8 @@ const RoleScout = {
 
             if (closestRoute) {
                 creep.moveTo(closestRoute);
+            } else {
+                this.sleep(creep);
             }
         },
     },

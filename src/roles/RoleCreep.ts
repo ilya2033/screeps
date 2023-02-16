@@ -142,6 +142,8 @@ const RoleCreep = {
         if (this.help(creep)) {
             return;
         }
+        creep.memory.recycle = true;
+        creep.memory.recover = false;
         const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
         if (!spawn) {
             this.moveHome(creep);
@@ -153,10 +155,12 @@ const RoleCreep = {
         }
     },
     refresh: function (creep: ICreep) {
+        creep.memory.recycle = false;
+        creep.memory.recover = true;
+
         const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
         if (spawn) {
             creep.moveTo(spawn);
-            creep.memory.recover = true;
         } else {
             this.moveHome(creep);
         }
