@@ -170,7 +170,7 @@ const RoleCreep = {
         const myRoom = creep.memory.spawnRoom;
 
         const route = Game.map.findRoute(creep.room.name, myRoom);
-        const routeToMyRoom = creep.pos.findClosestByRange(route[0].exit);
+        const routeToMyRoom = creep.pos.findClosestByRange(route[0]?.exit);
         creep.moveTo(routeToMyRoom);
         return true;
     },

@@ -32,7 +32,7 @@ const RoleTrack = {
             if (selectedResource.key === RESOURCE_ENERGY) {
                 return false;
             }
-            if (!(selectedResource.resource < 25000)) {
+            if (selectedResource.resource < 10000) {
                 return false;
             }
 

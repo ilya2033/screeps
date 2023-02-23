@@ -26,7 +26,7 @@ const conf = {
         MAX_HEALERS: 2,
         MAX_SCOUTS: 0,
 
-        MAX_TRACKS: 2,
+        MAX_TRACKS: 3,
         MIN_HARVESTERS: 2,
         MIN_UPGRADERS: 1,
         MIN_BUILDERS: 1,
