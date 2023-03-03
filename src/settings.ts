@@ -32,6 +32,20 @@ const conf = {
         MIN_BUILDERS: 1,
         MIN_SCOUTS: 1,
     },
+    resources: {
+        NEED_TO_BY: [RESOURCE_CATALYZED_UTRIUM_ALKALIDE] as ResourceConstant[],
+        BOOST_CREEPS: [
+            RESOURCE_CATALYZED_UTRIUM_ALKALIDE,
+        ] as ResourceConstant[],
+
+        MIN: {
+            [RESOURCE_CATALYZED_UTRIUM_ALKALIDE]: 5000,
+        },
+
+        MAX: {
+            [RESOURCE_CATALYZED_UTRIUM_ALKALIDE]: 20000,
+        },
+    },
 };
 
 export default conf;

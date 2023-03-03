@@ -25,6 +25,7 @@ import { checkNearRoomsScript } from "./checkNearRooms.rooms";
 import { roadScript } from "./room.roads";
 import { attackTimerScript } from "./attackTimer.room";
 import { recycleCreepsScript } from "./recycleCreeps.room";
+import { labScript } from "./lab.room";
 
 const roomScript = function () {
     Object.values(Game.rooms).forEach((room) => {
@@ -39,6 +40,7 @@ const roomScript = function () {
         roadScript(room);
         checkNearRoomsScript(room);
         recycleCreepsScript(room);
+        labScript(room);
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const attacked = room.memory.attacked;
         const toHeal = room.find(FIND_MY_CREEPS, {

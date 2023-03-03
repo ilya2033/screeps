@@ -1,16 +1,81 @@
 import RoleWorker from "./RoleWorker";
 import { ITrack } from "../types/Track";
+import conf from "../settings";
 
 const RoleTrack = {
     ...RoleWorker,
     ...{
         roleName: "track",
         basicParts: [CARRY, CARRY, MOVE],
+        runLab: function (creep: ITrack) {
+            const labs = creep.room.find(FIND_STRUCTURES, {
+                filter: (st: Structure) => st.structureType === STRUCTURE_LAB,
+            });
+            const labsWithFreeStore = labs.filter((lab: StructureLab) =>
+                lab.store.getFreeCapacity()
+            );
+            if (!labs.length) {
+                return false;
+            }
+
+            if (!creep.room.storage) {
+                return false;
+            }
+
+            let storageEntries = Object.entries(creep.room.storage.store);
+
+            if (!storageEntries.length) {
+                return false;
+            }
+
+            storageEntries.filter((resource) =>
+                conf.resources.BOOST_CREEPS.includes(
+                    resource[0] as ResourceConstant
+                )
+            );
+
+            const selectedResource: {
+                key: ResourceConstant;
+                resource: number;
+            } = {
+                key: storageEntries[0][0] as ResourceConstant,
+                resource: storageEntries[0][1],
+            };
+
+            const selectedTarget =
+                creep.pos.findClosestByPath(labsWithFreeStore);
+
+            if (selectedResource.key === RESOURCE_ENERGY) {
+                return false;
+            }
+
+            if (creep.store.getFreeCapacity() > 0) {
+                if (creep.pos.isNearTo(creep.room.storage)) {
+                    creep.withdraw(creep.room.storage, selectedResource.key);
+                } else {
+                    creep.moveTo(creep.room.storage, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            } else {
+                if (creep.pos.isNearTo(selectedTarget)) {
+                    creep.transfer(selectedTarget, selectedResource.key);
+                } else {
+                    creep.moveTo(selectedTarget, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            }
+            return true;
+        },
         runStorage: function (creep: ITrack) {
             if (!creep.room.terminal) {
                 return false;
             }
             if (!creep.room.storage) {
+                return false;
+            }
+            if (creep.store.energy > 0) {
                 return false;
             }
             let terminalEntries = Object.entries(creep.room.terminal.store);
@@ -89,6 +154,7 @@ const RoleTrack = {
             if (selectedResource.key === RESOURCE_ENERGY) {
                 return false;
             }
+
             if (selectedResource.resource < 10000) {
                 return false;
             }
@@ -129,12 +195,9 @@ const RoleTrack = {
 
             if (creep.room.storage) {
                 selectedTarget = creep.room.storage;
-            } else if (creep.room.terminal) {
-                selectedTarget = creep.room.terminal;
             }
-
             if (!selectedTarget) {
-                return;
+                return false;
             }
 
             if (creep.pos.isNearTo(selectedTarget)) {
@@ -163,6 +226,9 @@ const RoleTrack = {
             if (this.checkOtherResources(creep)) {
                 return;
             }
+            // if (this.runLab(creep)) {
+            //     return;
+            // }
 
             if (creep.memory.working === undefined) {
                 creep.memory.working = true;
@@ -195,11 +261,7 @@ const RoleTrack = {
                                       (structure.structureType ==
                                           STRUCTURE_TERMINAL &&
                                           structure.store[RESOURCE_ENERGY] <
-                                              10000 &&
-                                          creep.room.energyAvailable >
-                                              creep.room
-                                                  .energyCapacityAvailable *
-                                                  0.75)) &&
+                                              5000)) &&
                                   structure.store.getFreeCapacity(
                                       RESOURCE_ENERGY
                                   ) > 0
