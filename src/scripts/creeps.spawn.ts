@@ -139,13 +139,15 @@ const creepsSpawnScript = function () {
             )
         );
 
-        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.4);
+        const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.5);
 
         let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&
             myCreeps.claimers.length < 2;
 
-        let harvestersCondition = myCreeps.harvesters.length < creepsPerSource;
+        let harvestersCondition =
+            myCreeps.harvesters.length < conf.creeps.MIN_HARVESTERS ||
+            myCreeps.harvesters.length < creepsPerSource;
 
         let upgradersCondition =
             myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||

@@ -6,8 +6,65 @@ const RoleTrack = {
     ...{
         roleName: "track",
         basicParts: [CARRY, CARRY, MOVE],
+        runStorage: function (creep: ITrack) {
+            if (!creep.room.terminal) {
+                return false;
+            }
+            if (!creep.room.storage) {
+                return false;
+            }
+            let terminalEntries = Object.entries(creep.room.terminal.store);
+
+            if (!terminalEntries.length) {
+                return false;
+            }
+
+            terminalEntries.sort(
+                ([akey, avalue], [bkey, bvalue]) => bvalue - avalue
+            );
+
+            const selectedResource: {
+                key: ResourceConstant;
+                resource: number;
+            } = {
+                key: terminalEntries[0][0] as ResourceConstant,
+                resource: terminalEntries[0][1],
+            };
+
+            if (selectedResource.key === RESOURCE_ENERGY) {
+                return false;
+            }
+            if (
+                creep.room.storage?.store[selectedResource.key] > 20000 &&
+                selectedResource.resource < 20000
+            ) {
+                return false;
+            }
+
+            if (creep.store.getFreeCapacity() > 0) {
+                if (creep.pos.isNearTo(creep.room.terminal)) {
+                    creep.withdraw(creep.room.terminal, selectedResource.key);
+                } else {
+                    creep.moveTo(creep.room.terminal, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            } else {
+                if (creep.pos.isNearTo(creep.room.storage)) {
+                    creep.transfer(creep.room.storage, selectedResource.key);
+                } else {
+                    creep.moveTo(creep.room.storage, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
+                }
+            }
+            return true;
+        },
         runTerminal: function (creep: ITrack) {
             if (!creep.room.terminal) {
+                return false;
+            }
+            if (!creep.room.storage) {
                 return false;
             }
 
@@ -33,6 +90,10 @@ const RoleTrack = {
                 return false;
             }
             if (selectedResource.resource < 10000) {
+                return false;
+            }
+
+            if (creep.room.terminal?.store[selectedResource.key] > 10000) {
                 return false;
             }
 
@@ -92,6 +153,9 @@ const RoleTrack = {
         run: function (creep: ITrack) {
             if (!this.runBasic(creep)) return;
             if (creep.name === creep.room.memory.terminalTrack) {
+                if (this.runStorage(creep)) {
+                    return;
+                }
                 if (this.runTerminal(creep)) {
                     return;
                 }
@@ -119,8 +183,9 @@ const RoleTrack = {
                     ? creep.room.find(FIND_STRUCTURES, {
                           filter: (structure) => {
                               return (
-                                  (structure.structureType ==
-                                      STRUCTURE_EXTENSION ||
+                                  (structure.structureType == STRUCTURE_LAB ||
+                                      structure.structureType ==
+                                          STRUCTURE_EXTENSION ||
                                       structure.structureType ==
                                           STRUCTURE_SPAWN ||
                                       structure.structureType ==

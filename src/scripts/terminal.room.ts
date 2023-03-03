@@ -2,15 +2,24 @@ const terminalScript = function (room: Room) {
     if (!room.terminal) {
         return;
     }
+    if (!room.storage) {
+        return;
+    }
+    if (room.energyAvailable < room.energyCapacityAvailable * 0.8) {
+        return;
+    }
     const terminal: StructureTerminal = room.terminal;
+    const storage: StructureStorage = room.storage;
 
     Object.keys(terminal.store).forEach((resourceName) => {
         if (resourceName === RESOURCE_ENERGY) {
             return;
         }
+
         if (
             terminal.store[RESOURCE_ENERGY] >= 2000 &&
-            terminal.store[resourceName] >= 2000
+            terminal.store[resourceName] >= 2000 &&
+            storage.store[resourceName] >= 10000
         ) {
             const orders = Game.market.getAllOrders(
                 (order) =>
