@@ -63,6 +63,134 @@ const RoleWorker = {
             }
             return true;
         },
+        harvestEnergy: function (creep: IWorker) {
+            let targets = [];
+            let storedSource = null;
+
+            storedSource = <Source | null>(
+                Game.getObjectById(<Id<_HasId>>creep.memory.sourceId || null)
+            );
+
+            if (
+                !storedSource ||
+                (!storedSource.pos.getOpenPositions().length &&
+                    !creep.pos.isNearTo(storedSource)) ||
+                storedSource.room.name !== creep.room.name ||
+                storedSource.energy === 0
+            ) {
+                delete creep.memory.sourceId;
+                storedSource = creep.findEnergySource();
+            }
+
+            const closestDroppedEnergy = creep.pos.findClosestByPath(
+                FIND_DROPPED_RESOURCES,
+                {
+                    filter: (r: Resource) =>
+                        r.resourceType == RESOURCE_ENERGY &&
+                        r.amount > 0 &&
+                        r.pos.getOpenPositions().length,
+                }
+            );
+
+            const closestRuinEnergy = creep.pos.findClosestByPath(FIND_RUINS, {
+                filter: (r: Ruin) =>
+                    r.pos.getOpenPositions().length &&
+                    r.store[RESOURCE_ENERGY] > 0,
+            });
+
+            const closestTombEnergy = creep.pos.findClosestByPath(
+                FIND_TOMBSTONES,
+                {
+                    filter: (r: Ruin) =>
+                        r.pos.getOpenPositions().length &&
+                        r.store[RESOURCE_ENERGY] > 0,
+                }
+            );
+            if (
+                closestDroppedEnergy ||
+                closestRuinEnergy ||
+                closestTombEnergy
+            ) {
+                targets[targets.length] =
+                    closestDroppedEnergy ||
+                    closestRuinEnergy ||
+                    closestTombEnergy;
+            }
+
+            const closestStorage = creep.pos.findClosestByPath(
+                creep.findStorages(RESOURCE_ENERGY),
+                { filter: (st) => st.store[RESOURCE_ENERGY] > 0 }
+            );
+
+            const closestLink =
+                creep.memory.role !== "track" &&
+                creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (st) =>
+                        st.structureType === STRUCTURE_LINK &&
+                        st.store[RESOURCE_ENERGY] > 0,
+                });
+
+            if (closestLink) {
+                targets[targets.length] = closestLink;
+            }
+
+            if (closestStorage && !storedSource) {
+                targets[targets.length] = closestStorage;
+            }
+
+            if (storedSource) {
+                targets[targets.length] = storedSource;
+            }
+
+            const target = creep.pos.findClosestByPath(targets);
+
+            if (target) {
+                if (creep.pos.isNearTo(target)) {
+                    if (
+                        creep.withdraw(target, RESOURCE_ENERGY) ===
+                        ERR_INVALID_TARGET
+                    ) {
+                        if (creep.pickup(target) === ERR_INVALID_TARGET) {
+                            creep.harvest(target);
+                        }
+                    }
+                } else {
+                    creep.moveTo(target, {
+                        visualizePathStyle: { stroke: "#ffaa00" },
+                    });
+                }
+                return true;
+            }
+            return false;
+        },
+        findEnergySource: function (creep: IWorker) {
+            const sources: Source[] = creep.room.find(FIND_SOURCES);
+
+            if (sources.length) {
+                const source = Object.values(sources).find(
+                    (s) => s.pos.getOpenPositions().length > 0 && s.energy > 0
+                );
+
+                if (source) {
+                    creep.memory.sourceId = source.id;
+                    return source;
+                } else {
+                    const isNear = Object.values(sources).find(
+                        (s) =>
+                            s.pos.getOpenPositions().length === 0 &&
+                            s.energy > 0 &&
+                            creep.pos.isNearTo(s)
+                    );
+                    if (isNear) {
+                        const openPositions = creep.pos.getOpenPositions();
+                        if (openPositions?.length) {
+                            creep.moveTo(openPositions[0]);
+                        }
+                    }
+                }
+            }
+            return null;
+        },
 
         upgrade: function (creep: IWorker) {
             if (creep.room.controller && creep.room.controller.my) {

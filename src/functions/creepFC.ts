@@ -1,33 +1,4 @@
 export const creepFC = () => {
-    Creep.prototype.findEnergySource = function () {
-        const sources: Source[] = this.room.find(FIND_SOURCES);
-
-        if (sources.length) {
-            const source = Object.values(sources).find(
-                (s) => s.pos.getOpenPositions().length > 0 && s.energy > 0
-            );
-
-            if (source) {
-                this.memory.sourceId = source.id;
-                return source;
-            } else {
-                const isNear = Object.values(sources).find(
-                    (s) =>
-                        s.pos.getOpenPositions().length === 0 &&
-                        s.energy > 0 &&
-                        this.pos.isNearTo(s)
-                );
-                if (isNear) {
-                    const openPositions = this.pos.getOpenPositions();
-                    if (openPositions?.length) {
-                        this.moveTo(openPositions[0]);
-                    }
-                }
-            }
-        }
-        return null;
-    };
-
     Creep.prototype.findPowerBank = function () {
         const powerBanks: StructurePowerBank[] = this.room.find(
             FIND_STRUCTURES,

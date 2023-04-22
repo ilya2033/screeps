@@ -1,7 +1,6 @@
 import { IWorker, IWorkerMemory } from "./Worker";
 
 export interface IBuilderMemory extends IWorkerMemory {
-    sourceId?: string;
     building?: boolean;
 }
 

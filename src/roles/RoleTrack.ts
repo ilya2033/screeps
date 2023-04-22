@@ -68,6 +68,57 @@ const RoleTrack = {
             }
             return true;
         },
+
+        harvestEnergy: function (creep: ITrack) {
+            let targets = [];
+            let storedSource = null;
+
+            const closestStorage = creep.pos.findClosestByPath(
+                creep.findStorages(RESOURCE_ENERGY),
+                { filter: (st) => st.store[RESOURCE_ENERGY] > 0 }
+            );
+
+            const closestLink =
+                creep.memory.role !== "track" &&
+                creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (st) =>
+                        st.structureType === STRUCTURE_LINK &&
+                        st.store[RESOURCE_ENERGY] > 0,
+                });
+
+            if (closestLink) {
+                targets[targets.length] = closestLink;
+            }
+
+            if (closestStorage && !storedSource) {
+                targets[targets.length] = closestStorage;
+            }
+            if (storedSource) {
+                targets[targets.length] = storedSource;
+            }
+
+            const target = creep.pos.findClosestByPath(targets);
+
+            if (target) {
+                if (creep.pos.isNearTo(target)) {
+                    if (
+                        creep.withdraw(target, RESOURCE_ENERGY) ===
+                        ERR_INVALID_TARGET
+                    ) {
+                        if (creep.pickup(target) === ERR_INVALID_TARGET) {
+                            creep.harvest(target);
+                        }
+                    }
+                } else {
+                    creep.moveTo(target, {
+                        visualizePathStyle: { stroke: "#ffaa00" },
+                    });
+                }
+                return true;
+            }
+            return false;
+        },
+
         runStorage: function (creep: ITrack) {
             if (!creep.room.terminal) {
                 return false;

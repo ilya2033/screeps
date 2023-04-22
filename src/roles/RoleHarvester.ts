@@ -6,7 +6,85 @@ const RoleHarvester = {
     ...RoleWorker,
     ...{
         roleName: "harvester",
+        harvestEnergy: function (creep: IHarvester) {
+            let targets = [];
+            let storedSource = null;
 
+            storedSource = <Source | null>(
+                Game.getObjectById(<Id<_HasId>>creep.memory.sourceId || null)
+            );
+
+            if (
+                !storedSource ||
+                (!storedSource.pos.getOpenPositions().length &&
+                    !creep.pos.isNearTo(storedSource)) ||
+                storedSource.room.name !== creep.room.name ||
+                storedSource.energy === 0
+            ) {
+                delete creep.memory.sourceId;
+                storedSource = creep.findEnergySource();
+            }
+
+            const closestDroppedEnergy = creep.pos.findClosestByPath(
+                FIND_DROPPED_RESOURCES,
+                {
+                    filter: (r: Resource) =>
+                        r.resourceType == RESOURCE_ENERGY &&
+                        r.amount > 0 &&
+                        r.pos.getOpenPositions().length,
+                }
+            );
+
+            const closestRuinEnergy = creep.pos.findClosestByPath(FIND_RUINS, {
+                filter: (r: Ruin) =>
+                    r.pos.getOpenPositions().length &&
+                    r.store[RESOURCE_ENERGY] > 0,
+            });
+
+            const closestTombEnergy = creep.pos.findClosestByPath(
+                FIND_TOMBSTONES,
+                {
+                    filter: (r: Ruin) =>
+                        r.pos.getOpenPositions().length &&
+                        r.store[RESOURCE_ENERGY] > 0,
+                }
+            );
+            if (
+                closestDroppedEnergy ||
+                closestRuinEnergy ||
+                closestTombEnergy
+            ) {
+                targets[targets.length] =
+                    closestDroppedEnergy ||
+                    closestRuinEnergy ||
+                    closestTombEnergy;
+            }
+
+            if (storedSource) {
+                targets[targets.length] = storedSource;
+            }
+
+            const target = creep.pos.findClosestByPath(targets);
+
+            if (target) {
+                if (creep.pos.isNearTo(target)) {
+                    if (
+                        creep.withdraw(target, RESOURCE_ENERGY) ===
+                        ERR_INVALID_TARGET
+                    ) {
+                        if (creep.pickup(target) === ERR_INVALID_TARGET) {
+                            creep.harvest(target);
+                        }
+                    }
+                } else {
+                    creep.moveTo(target, {
+                        visualizePathStyle: { stroke: "#ffaa00" },
+                    });
+                }
+                return true;
+            }
+            return false;
+        },
         run: function (creep: IHarvester) {
             let selectedTarget: Structure | null = null;
 

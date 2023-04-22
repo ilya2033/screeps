@@ -1100,7 +1100,6 @@ interface Creep extends RoomObject {
     harvestMinerals: () => void;
     run: (creep: Creep, ...args: any) => void;
     findMineralSource: () => Mineral | null;
-    findEnergySource: () => Source | null;
     findPowerBank: () => StructurePowerBank | null;
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;
@@ -1827,7 +1826,7 @@ type BodyPartDefinition<T extends BodyPartConstant = BodyPartConstant> =
                *
                * If the body part is boosted, this property specifies the mineral type which is used for boosting.
                */
-              boost?: keyof typeof BOOSTS[T];
+              boost?: keyof (typeof BOOSTS)[T];
               /**
                * One of the body part types constants.
                */
