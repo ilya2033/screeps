@@ -79,7 +79,7 @@ const RoleWorker = {
                 storedSource.energy === 0
             ) {
                 delete creep.memory.sourceId;
-                storedSource = creep.findEnergySource();
+                storedSource = this.findEnergySource(creep);
             }
 
             const closestDroppedEnergy = creep.pos.findClosestByPath(

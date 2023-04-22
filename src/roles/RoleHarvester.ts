@@ -1,6 +1,5 @@
 import RoleWorker from "./RoleWorker";
 import { IHarvester } from "../types/Harvester";
-import { roomPositionFC } from "../functions/roomPositionFC";
 
 const RoleHarvester = {
     ...RoleWorker,
@@ -22,7 +21,7 @@ const RoleHarvester = {
                 storedSource.energy === 0
             ) {
                 delete creep.memory.sourceId;
-                storedSource = creep.findEnergySource();
+                storedSource = this.findEnergySource(creep);
             }
 
             const closestDroppedEnergy = creep.pos.findClosestByPath(
@@ -112,7 +111,7 @@ const RoleHarvester = {
             ).length;
 
             if (creep.store.getFreeCapacity() && !checkOtherResources) {
-                if (!creep.harvestEnergy()) {
+                if (!this.harvestEnergy(creep)) {
                     this.harvestFromOtherRooms(creep);
                     return;
                 }

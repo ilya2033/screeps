@@ -35,7 +35,7 @@ const RoleUpgrader = {
                     this.upgrade(creep);
                 }
             } else {
-                creep.harvestEnergy();
+                this.harvestEnergy(creep);
             }
         },
     },

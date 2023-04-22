@@ -32,7 +32,7 @@ const RoleBuilder = {
                     }
                 }
             } else {
-                creep.harvestEnergy();
+                this.harvestEnergy(creep);
             }
         },
     },

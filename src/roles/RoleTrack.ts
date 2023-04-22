@@ -294,7 +294,7 @@ const RoleTrack = {
                 creep.say("🚧 work");
             }
             if (!creep.memory.working) {
-                creep.harvestEnergy();
+                this.harvestEnergy(creep);
             } else {
                 const targets: Structure[] = creep.store[RESOURCE_ENERGY]
                     ? creep.room.find(FIND_STRUCTURES, {
