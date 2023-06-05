@@ -19,7 +19,7 @@ const terminalScript = function (room: Room) {
         }
 
         if (
-            terminal.store[RESOURCE_ENERGY] >= 2000 &&
+            terminal.store[RESOURCE_ENERGY] >= 3500 &&
             terminal.store[resourceName] >= 2000 &&
             storage.store[resourceName] >= 10000
         ) {
@@ -31,7 +31,7 @@ const terminalScript = function (room: Room) {
                         1000,
                         room.name,
                         order.roomName
-                    ) < 2000
+                    ) < 3500
             );
             console.log("Buy orders found: " + orders.length);
             orders.sort(function (a, b) {
