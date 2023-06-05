@@ -160,7 +160,13 @@ const creepsSpawnScript = function () {
         let excavatorsCondition =
             !attacked &&
             myCreeps.excavators.length < extractors.length &&
-            minerals.some((mineral) => mineral.mineralAmount > 0);
+            minerals.some(
+                (mineral) =>
+                    mineral.mineralAmount > 0 &&
+                    room.storage &&
+                    room.storage.store.getFreeCapacity() >
+                        room.storage.store.getCapacity() * 0.2
+            );
         let warriorsCondition =
             attacked && myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
 

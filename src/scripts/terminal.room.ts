@@ -7,12 +7,11 @@ const terminalScript = function (room: Room) {
     if (!room.storage) {
         return;
     }
+
     if (
         room.energyAvailable < room.energyCapacityAvailable * 0.8 &&
-        !(
-            room.storage.store.getFreeCapacity() >
-            room.storage.store.getCapacity() * 0.8
-        )
+        room.storage.store.getFreeCapacity() >
+            room.storage.store.getCapacity() * 0.2
     ) {
         return;
     }
@@ -26,6 +25,7 @@ const terminalScript = function (room: Room) {
         if (resourceName === RESOURCE_ENERGY) {
             return;
         }
+
         if (
             terminal.store[RESOURCE_ENERGY] >= 2000 &&
             terminal.store[resourceName] >= 1000 &&
@@ -57,6 +57,15 @@ const terminalScript = function (room: Room) {
             }
         }
     });
+
+    if (
+        !(
+            room.storage.store.getFreeCapacity() >
+            room.storage.store.getCapacity() * 0.2
+        )
+    ) {
+        return;
+    }
 
     conf.resources.NEED_TO_BY.forEach((resourceName: ResourceConstant) => {
         if (
