@@ -7,21 +7,30 @@ const terminalScript = function (room: Room) {
     if (!room.storage) {
         return;
     }
-    if (room.energyAvailable < room.energyCapacityAvailable * 0.8) {
+    if (
+        room.energyAvailable < room.energyCapacityAvailable * 0.8 &&
+        !(
+            room.storage.store.getFreeCapacity() >
+            room.storage.store.getCapacity() * 0.8
+        )
+    ) {
         return;
     }
     const terminal: StructureTerminal = room.terminal;
     const storage: StructureStorage = room.storage;
 
+    const storageCapacity = storage.store.getCapacity();
+    const terminalCapacity = terminal.store.getCapacity();
+
     Object.keys(terminal.store).forEach((resourceName) => {
         if (resourceName === RESOURCE_ENERGY) {
             return;
         }
-
         if (
-            terminal.store[RESOURCE_ENERGY] >= 3500 &&
-            terminal.store[resourceName] >= 2000 &&
-            storage.store[resourceName] >= 10000
+            terminal.store[RESOURCE_ENERGY] >= 2000 &&
+            terminal.store[resourceName] >= 1000 &&
+            (terminal.store[resourceName] >= terminalCapacity * 0.05 ||
+                storage.store[resourceName] >= storageCapacity * 0.01)
         ) {
             const orders = Game.market.getAllOrders(
                 (order) =>
@@ -31,7 +40,7 @@ const terminalScript = function (room: Room) {
                         1000,
                         room.name,
                         order.roomName
-                    ) < 3500
+                    ) < 2000
             );
             console.log("Buy orders found: " + orders.length);
             orders.sort(function (a, b) {
