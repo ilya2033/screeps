@@ -1,9 +1,64 @@
-import { ICreep } from "../types/Creep";
+import { ICreepMemory, ICreep } from "../types/Creep";
 
-const RoleCreep = {
-    roleName: "",
-    recordRoom: (creep: ICreep) => {
-        const room = creep.room;
+class RoleCreep extends Creep implements ICreep {
+    roleName: string;
+    memory: ICreepMemory;
+    basicParts: BodyPartConstant[];
+    defaultSetupT1?: BodyPartConstant[];
+    defaultSetupT2?: BodyPartConstant[];
+    defaultSetupT3?: BodyPartConstant[];
+    defaultSetupT4?: BodyPartConstant[];
+
+    moveToDefendPoint(room: Room) {
+        let flag: Flag;
+
+        if (room) {
+            flag = Game.flags[`${room.name}-defendPoint`];
+        } else {
+            flag = Game.flags[`${this.room.name}-defendPoint`];
+        }
+
+        this.moveTo(flag);
+    }
+
+    moveToSpawnPoint(room: Room) {
+        let flag: Flag;
+
+        if (room) {
+            flag = Game.flags[`${room.name}-spawnPoint`];
+        } else {
+            flag = Game.flags[`${this.room.name}-spawnPoint`];
+        }
+
+        this.moveTo(flag);
+    }
+
+    findPowerBank() {
+        const powerBanks: StructurePowerBank[] = this.room.find(
+            FIND_STRUCTURES,
+            {
+                filter: (st: Structure) =>
+                    st.structureType === STRUCTURE_POWER_BANK,
+            }
+        );
+
+        if (powerBanks.length) {
+            const powerBank = Object.values(powerBanks).find(
+                (s) => s.pos.getOpenPositions().length > 0
+            );
+
+            if (powerBank) {
+                this.memory.powerBankId = powerBank.id;
+                return powerBank;
+            }
+        }
+
+        return null;
+    }
+
+    recordRoom() {
+        const room = this.room;
+
         Memory.rooms[room.name] = {
             ...Memory.rooms[room.name],
             ...{
@@ -12,101 +67,59 @@ const RoleCreep = {
                 lastChecked: Game.time,
             },
         };
-    },
+    }
 
-    harvestFromOtherRooms: function (creep: ICreep) {
-        let rooms = creep.room.memory.nearRooms
-            .filter(
-                (roomName) =>
-                    !Memory.rooms[roomName]?.owner &&
-                    Memory.rooms[roomName]?.controller
-            )
-            .filter((roomName) =>
-                Game.rooms[roomName]
-                    ? Game.rooms[roomName]
-                          .find(FIND_SOURCES)
-                          .some((source) => source.pos.getOpenPositions())
-                    : true
-            );
-        if (!rooms.length) {
-            rooms = creep.room.memory.nearRooms
-                .reduce((acc, roomName) => {
-                    const nearRooms = Memory.rooms[roomName]?.nearRooms;
-                    if (nearRooms?.length) {
-                        console.log({ acc, nearRooms });
-                        return [...new Set([...acc, ...nearRooms])];
-                    }
-                    return acc;
-                }, [])
-                .filter(
-                    (roomName) =>
-                        !Memory.rooms[roomName]?.owner &&
-                        Memory.rooms[roomName]?.controller
-                )
-                .filter((roomName) =>
-                    Game.rooms[roomName]
-                        ? Game.rooms[roomName]
-                              .find(FIND_SOURCES)
-                              .some((source) => source.pos.getOpenPositions())
-                        : true
-                );
+    recordMove() {
+        if (!this.room.memory.roads) {
+            this.room.memory.roads = [];
         }
 
-        if (rooms.length) {
-            const routes = Game.map.findRoute(creep.room.name, rooms[0]);
-
-            const closestRoute = creep.pos.findClosestByRange(routes[0]?.exit);
-            if (closestRoute) {
-                creep.moveTo(closestRoute);
-            }
-        }
-    },
-    recordMove(creep: ICreep) {
-        if (!creep.room.memory.roads) {
-            creep.room.memory.roads = [];
-        }
         if (
-            !creep.memory.oldPosition ||
-            creep.memory.oldPosition.x !== creep.pos.x ||
-            creep.memory.oldPosition.y !== creep.pos.y
+            !this.memory.oldPosition ||
+            this.memory.oldPosition.x !== this.pos.x ||
+            this.memory.oldPosition.y !== this.pos.y
         ) {
-            const roadIndex = creep.room.memory.roads?.findIndex(
-                (road) => road.x === creep.pos.x && road.y === creep.pos.y
+            const roadIndex = this.room.memory.roads?.findIndex(
+                (road) => road.x === this.pos.x && road.y === this.pos.y
             );
+
             if (roadIndex >= 0) {
-                creep.room.memory.roads[roadIndex].count++;
+                this.room.memory.roads[roadIndex].count++;
             } else {
-                creep.room.memory.roads.push({
-                    x: creep.pos.x,
-                    y: creep.pos.y,
+                this.room.memory.roads.push({
+                    x: this.pos.x,
+                    y: this.pos.y,
                     count: 1,
                 });
             }
         }
-        creep.memory.oldPosition = { x: creep.pos.x, y: creep.pos.y };
-    },
 
-    spawn: function (spawn, basicParts = this.basicParts) {
+        this.memory.oldPosition = { x: this.pos.x, y: this.pos.y };
+    }
+
+    spawn(spawn: StructureSpawn) {
         let setup = this.defaultSetupT1;
 
-        if (basicParts) {
-            const bodyCost = basicParts.reduce(function (cost, part) {
+        if (this.basicParts) {
+            let energy = spawn.room.energyAvailable;
+            const bodyCost = this.basicParts.reduce(function (cost, part) {
                 return cost + BODYPART_COST[part];
             }, 0);
-            let energy = spawn.room.energyAvailable;
             setup = [];
+
             while (energy >= bodyCost) {
-                setup = [...setup, ...basicParts];
+                setup = [...setup, ...this.basicParts];
                 energy = energy - bodyCost;
             }
+
             if (setup.length === 0) {
-                basicParts = null;
+                setup = null;
             }
         }
 
         if (
             spawn.room.energyAvailable === spawn.room.energyCapacityAvailable &&
-            !basicParts
+            !setup
         ) {
             switch (true) {
                 case spawn.room.energyAvailable >= 1200:
@@ -120,6 +133,10 @@ const RoleCreep = {
                     setup = this.defaultSetupT2;
                     break;
             }
+        }
+
+        if (!setup) {
+            return;
         }
 
         spawn.spawnCreep(
@@ -136,44 +153,56 @@ const RoleCreep = {
                 },
             }
         );
-    },
+    }
 
-    sleep: function (creep: ICreep) {
-        if (this.help(creep)) {
+    sleep() {
+        if (this.help()) {
             return;
         }
-        creep.memory.recycle = true;
-        creep.memory.recover = false;
-        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        this.memory.recycle = true;
+        this.memory.recover = false;
+        const spawn = this.pos.findClosestByPath(FIND_MY_SPAWNS);
         if (!spawn) {
-            this.moveHome(creep);
+            this.moveHome();
         } else {
-            if (!creep.pos.isNearTo(spawn)) {
-                creep.say("😴 sleep");
-                creep.moveTo(spawn);
+            if (!this.pos.isNearTo(spawn)) {
+                this.say("😴 sleep");
+                this.moveTo(spawn);
             }
         }
-    },
-    refresh: function (creep: ICreep) {
-        creep.memory.recycle = false;
-        creep.memory.recover = true;
+    }
+    refresh() {
+        const spawn = this.pos.findClosestByPath(FIND_MY_SPAWNS);
 
-        const spawn = creep.pos.findClosestByPath(FIND_MY_SPAWNS);
+        this.memory.recycle = false;
+        this.memory.recover = true;
+
         if (spawn) {
-            creep.moveTo(spawn);
+            this.moveTo(spawn);
         } else {
-            this.moveHome(creep);
+            this.moveHome();
         }
-        return true;
-    },
-    moveHome: function (creep: ICreep) {
-        const myRoom = creep.memory.spawnRoom;
 
-        const route = Game.map.findRoute(creep.room.name, myRoom);
-        const routeToMyRoom = creep.pos.findClosestByRange(route[0]?.exit);
-        creep.moveTo(routeToMyRoom);
         return true;
-    },
-};
+    }
 
-export default RoleCreep as unknown as ICreep;
+    moveHome() {
+        const myRoom = this.memory.spawnRoom;
+        const route = Game.map.findRoute(this.room.name, myRoom);
+        const routeToMyRoom = this.pos.findClosestByRange(route[0]?.exit);
+
+        this.moveTo(routeToMyRoom);
+
+        return true;
+    }
+
+    help() {
+        return false;
+    }
+
+    run() {
+        return;
+    }
+}
+
+export { RoleCreep };

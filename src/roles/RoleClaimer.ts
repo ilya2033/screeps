@@ -1,27 +1,25 @@
 import { IClaimer } from "../types/Claimer";
-import RoleWorker from "./RoleWorker";
+import { RoleWorker } from "./RoleWorker";
 
-const RoleClaimer = {
-    ...RoleWorker,
-    ...{
-        defaultSetupT1: [CLAIM, CLAIM, MOVE],
-        basicParts: null,
-        roleName: "claimer",
-        run: function (creep: IClaimer) {
-            if (!creep.room.controller.my) {
-                if (creep.pos.isNearTo(creep.room.controller)) {
-                    creep.claimController(creep.room.controller);
-                } else {
-                    creep.moveTo(creep.room.controller);
-                }
+class RoleClaimer extends RoleWorker implements IClaimer {
+    roleName = "claimer";
+    basicParts = null;
+    defaultSetupT1 = <BodyPartConstant[]>[CLAIM, CLAIM, MOVE];
+
+    run() {
+        if (!this.room.controller.my) {
+            if (this.pos.isNearTo(this.room.controller)) {
+                this.claimController(this.room.controller);
             } else {
-                const flagName = `${creep.room.name}-attackPoint`;
-                if (!Game.flags[flagName]) return;
-
-                creep.moveTo(Game.flags[flagName]);
+                this.moveTo(this.room.controller);
             }
-        },
-    },
-};
+        } else {
+            const flagName = `${this.room.name}-attackPoint`;
+            if (!Game.flags[flagName]) return;
 
-export default RoleClaimer as unknown as IClaimer;
+            this.moveTo(Game.flags[flagName]);
+        }
+    }
+}
+
+export { RoleClaimer };

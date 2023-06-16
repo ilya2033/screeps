@@ -1,41 +1,39 @@
-import RoleWorker from "./RoleWorker";
-import { IBuilder } from "../types/Builder";
+import { RoleWorker } from "./RoleWorker";
+import { IBuilder, IBuilderMemory } from "../types/Builder";
 
-const RoleBuilder = {
-    ...RoleWorker,
-    ...{
-        roleName: "builder",
-        run: function (creep: IBuilder) {
-            if (!this.runBasic(creep)) return;
+class RoleBuilder extends RoleWorker implements IBuilder {
+    roleName = "builder";
+    memory: IBuilderMemory;
+    run() {
+        if (!this.runBasic()) return;
 
-            if (creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-                creep.memory.building = false;
-                creep.say("🔄 harvest");
-            }
-            if (!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-                creep.memory.building = true;
-                creep.say("🚧 build");
-            }
+        if (this.memory.working && this.store[RESOURCE_ENERGY] == 0) {
+            this.memory.working = false;
+            this.say("🔄 harvest");
+        }
+        if (!this.memory.working && this.store.getFreeCapacity() == 0) {
+            this.memory.working = true;
+            this.say("🚧 work");
+        }
 
-            if (creep.memory.building) {
-                let buildTargets = creep.room.find(FIND_CONSTRUCTION_SITES);
+        if (this.memory.working) {
+            let buildTargets = this.room.find(FIND_CONSTRUCTION_SITES);
 
-                if (!this.help(creep)) {
-                    if (buildTargets.length) {
-                        if (creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
-                            creep.moveTo(buildTargets[0], {
-                                visualizePathStyle: { stroke: "#ffffff" },
-                            });
-                        }
-                    } else {
-                        this.sleep(creep);
+            if (!this.help()) {
+                if (buildTargets.length) {
+                    if (this.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
+                        this.moveTo(buildTargets[0], {
+                            visualizePathStyle: { stroke: "#ffffff" },
+                        });
                     }
+                } else {
+                    this.sleep();
                 }
-            } else {
-                this.harvestEnergy(creep);
             }
-        },
-    },
-};
+        } else {
+            this.harvestEnergy();
+        }
+    }
+}
 
-export default RoleBuilder as unknown as IBuilder;
+export { RoleBuilder };

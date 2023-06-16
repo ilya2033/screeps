@@ -1,16 +1,14 @@
-import RoleScout from "../roles/RoleScout";
+import { RoleScout } from "../roles/RoleScout";
 import { ICreep } from "../types/Creep";
 import { IScout } from "../types/Scout";
 
 export const checkNearRoomsScript = (room: Room) => {
     let time = Game.time;
     let needToCheck: string[] = [];
-    const scoutes: IScout[] = <ICreep[]>(
-        Object.values(Game.creeps).filter(
-            (creep: ICreep) =>
-                creep.memory.role === "scout" &&
-                creep.memory.spawnRoom === room.name
-        )
+    const scoutes: RoleScout[] = Object.values(Game.creeps).filter(
+        (creep: ICreep) =>
+            creep.memory.role === "scout" &&
+            creep.memory.spawnRoom === room.name
     );
     if (!room.memory.nearRooms?.length) {
         const nearExists = Game.map.describeExits(room.name);
@@ -39,10 +37,10 @@ export const checkNearRoomsScript = (room: Room) => {
                 }
             }
         } else {
-            scoutes.forEach((creep) => RoleScout.run(creep, needToCheck[0]));
+            scoutes.forEach((creep) => creep.run(needToCheck[0]));
             return;
         }
     } else {
-        scoutes.forEach((creep) => RoleScout.run(creep));
+        scoutes.forEach((creep) => creep.run());
     }
 };

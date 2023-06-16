@@ -1,39 +1,35 @@
-import RoleWorker from "./RoleWorker";
+import { RoleWorker } from "./RoleWorker";
 import { IExcavator } from "../types/Excavator";
-import { roomPositionFC } from "../functions/roomPositionFC";
 
-const RoleExcavator = {
-    ...RoleWorker,
-    ...{
-        roleName: "excavator",
-        run: function (creep: IExcavator) {
-            if (!this.runBasic(creep)) return;
-            const selectedTarget = creep.room.storage;
-            if (creep.store.getFreeCapacity()) {
-                creep.harvestMinerals();
-            } else {
-                if (selectedTarget) {
-                    if (creep.pos.isNearTo(selectedTarget)) {
-                        creep.transfer(
-                            selectedTarget,
-                            //@ts-ignore
-                            _.findKey(creep.store)
-                        );
-                    } else {
-                        creep.moveTo(selectedTarget, {
-                            visualizePathStyle: { stroke: "#ffffff" },
-                        });
-                    }
+class RoleExcavator extends RoleWorker implements IExcavator {
+    roleName = "excavator";
+    run() {
+        if (!this.runBasic()) return;
+        const selectedTarget = this.room.storage;
+        if (this.store.getFreeCapacity()) {
+            this.harvestMinerals();
+        } else {
+            if (selectedTarget) {
+                if (this.pos.isNearTo(selectedTarget)) {
+                    this.transfer(
+                        selectedTarget,
+                        //@ts-ignore
+                        _.findKey(this.store)
+                    );
+                } else {
+                    this.moveTo(selectedTarget, {
+                        visualizePathStyle: { stroke: "#ffffff" },
+                    });
                 }
             }
+        }
 
-            if (!selectedTarget && creep.store.getFreeCapacity() === 0) {
-                if (!this.repair(creep)) {
-                    this.sleep(creep);
-                }
+        if (!selectedTarget && this.store.getFreeCapacity() === 0) {
+            if (!this.repairStructures()) {
+                this.sleep();
             }
-        },
-    },
-};
+        }
+    }
+}
 
-export default RoleExcavator as unknown as IExcavator;
+export { RoleExcavator };
