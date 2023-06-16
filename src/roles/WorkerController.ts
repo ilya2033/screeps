@@ -1,13 +1,13 @@
-import { IWorker, IWorkerMemory } from "../types/Worker";
-import { RoleCreep } from "./RoleCreep";
+import { IWorker } from "../types/Worker";
+import { CreepController } from "./CreepController";
 
-class RoleWorker extends RoleCreep implements IWorker {
-    memory: IWorkerMemory;
+class WorkerController extends CreepController {
+    creep: IWorker;
 
-    roleName = "worker";
-    basicParts = <BodyPartConstant[]>[WORK, MOVE, CARRY];
-    defaultSetupT1 = <BodyPartConstant[]>[WORK, MOVE, CARRY];
-    defaultSetupT2 = <BodyPartConstant[]>[
+    static roleName = "worker";
+    static basicParts = <BodyPartConstant[]>[WORK, MOVE, CARRY];
+    static defaultSetupT1 = <BodyPartConstant[]>[WORK, MOVE, CARRY];
+    static defaultSetupT2 = <BodyPartConstant[]>[
         WORK,
         WORK,
         WORK,
@@ -17,7 +17,7 @@ class RoleWorker extends RoleCreep implements IWorker {
         MOVE,
         MOVE,
     ];
-    defaultSetupT3 = <BodyPartConstant[]>[
+    static defaultSetupT3 = <BodyPartConstant[]>[
         WORK,
         WORK,
         WORK,
@@ -30,7 +30,7 @@ class RoleWorker extends RoleCreep implements IWorker {
         MOVE,
         MOVE,
     ];
-    defaultSetupT4 = <BodyPartConstant[]>[
+    static defaultSetupT4 = <BodyPartConstant[]>[
         WORK,
         WORK,
         WORK,
@@ -52,21 +52,22 @@ class RoleWorker extends RoleCreep implements IWorker {
         this.recordMove();
         this.recordRoom();
         if (
-            this.ticksToLive < 200 &&
-            this.room.energyAvailable > this.room.energyCapacityAvailable * 0.7
+            this.creep.ticksToLive < 200 &&
+            this.creep.room.energyAvailable >
+                this.creep.room.energyCapacityAvailable * 0.7
         ) {
             this.refresh();
             return false;
         }
-        if (this.memory.recover) {
+        if (this.creep.memory.recover) {
             if (
-                this.ticksToLive < 1400 &&
-                this.room.energyAvailable >
-                    this.room.energyCapacityAvailable * 0.7
+                this.creep.ticksToLive < 1400 &&
+                this.creep.room.energyAvailable >
+                    this.creep.room.energyCapacityAvailable * 0.7
             ) {
                 return false;
             }
-            this.memory.recover = false;
+            this.creep.memory.recover = false;
         }
         return true;
     }
@@ -75,21 +76,21 @@ class RoleWorker extends RoleCreep implements IWorker {
         let storedSource = null;
 
         storedSource = <Source | null>(
-            Game.getObjectById(<Id<_HasId>>this.memory.sourceId || null)
+            Game.getObjectById(<Id<_HasId>>this.creep.memory.sourceId || null)
         );
 
         if (
             !storedSource ||
             (!storedSource.pos.getOpenPositions().length &&
-                !this.pos.isNearTo(storedSource)) ||
-            storedSource.room.name !== this.room.name ||
+                !this.creep.pos.isNearTo(storedSource)) ||
+            storedSource.room.name !== this.creep.room.name ||
             storedSource.energy === 0
         ) {
-            delete this.memory.sourceId;
-            storedSource = this.findEnergySource();
+            delete this.creep.memory.sourceId;
+            storedSource = this.creep.findEnergySource();
         }
 
-        const closestDroppedEnergy = this.pos.findClosestByPath(
+        const closestDroppedEnergy = this.creep.pos.findClosestByPath(
             FIND_DROPPED_RESOURCES,
             {
                 filter: (r: Resource) =>
@@ -99,27 +100,34 @@ class RoleWorker extends RoleCreep implements IWorker {
             }
         );
 
-        const closestRuinEnergy = this.pos.findClosestByPath(FIND_RUINS, {
+        const closestRuinEnergy = this.creep.pos.findClosestByPath(FIND_RUINS, {
             filter: (r: Ruin) =>
                 r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
         });
 
-        const closestTombEnergy = this.pos.findClosestByPath(FIND_TOMBSTONES, {
-            filter: (r: Ruin) =>
-                r.pos.getOpenPositions().length && r.store[RESOURCE_ENERGY] > 0,
-        });
+        const closestTombEnergy = this.creep.pos.findClosestByPath(
+            FIND_TOMBSTONES,
+            {
+                filter: (r: Ruin) =>
+                    r.pos.getOpenPositions().length &&
+                    r.store[RESOURCE_ENERGY] > 0,
+            }
+        );
         if (closestDroppedEnergy || closestRuinEnergy || closestTombEnergy) {
             targets[targets.length] =
                 closestDroppedEnergy || closestRuinEnergy || closestTombEnergy;
         }
 
-        const closestStorage = this.pos.findClosestByPath(this.findStorages(), {
-            filter: (st) => st.store[RESOURCE_ENERGY] > 0,
-        });
+        const closestStorage = this.creep.pos.findClosestByPath(
+            this.creep.findStorages(),
+            {
+                filter: (st) => st.store[RESOURCE_ENERGY] > 0,
+            }
+        );
 
         const closestLink =
-            this.memory.role !== "track" &&
-            this.pos.findClosestByPath(FIND_STRUCTURES, {
+            this.creep.memory.role !== "track" &&
+            this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (st) =>
                     st.structureType === STRUCTURE_LINK &&
                     st.store[RESOURCE_ENERGY] > 0,
@@ -137,20 +145,20 @@ class RoleWorker extends RoleCreep implements IWorker {
             targets[targets.length] = storedSource;
         }
 
-        const target = this.pos.findClosestByPath(targets);
+        const target = this.creep.pos.findClosestByPath(targets);
 
         if (target) {
-            if (this.pos.isNearTo(target)) {
+            if (this.creep.pos.isNearTo(target)) {
                 if (
-                    this.withdraw(target, RESOURCE_ENERGY) ===
+                    this.creep.withdraw(target, RESOURCE_ENERGY) ===
                     ERR_INVALID_TARGET
                 ) {
-                    if (this.pickup(target) === ERR_INVALID_TARGET) {
-                        this.harvest(target);
+                    if (this.creep.pickup(target) === ERR_INVALID_TARGET) {
+                        this.creep.harvest(target);
                     }
                 }
             } else {
-                this.moveTo(target, {
+                this.creep.moveTo(target, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
@@ -160,7 +168,7 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 
     findEnergySource() {
-        const sources: Source[] = this.room.find(FIND_SOURCES);
+        const sources: Source[] = this.creep.room.find(FIND_SOURCES);
 
         if (sources.length) {
             const source = Object.values(sources).find(
@@ -168,19 +176,19 @@ class RoleWorker extends RoleCreep implements IWorker {
             );
 
             if (source) {
-                this.memory.sourceId = source.id;
+                this.creep.memory.sourceId = source.id;
                 return source;
             } else {
                 const isNear = Object.values(sources).find(
                     (s) =>
                         s.pos.getOpenPositions().length === 0 &&
                         s.energy > 0 &&
-                        this.pos.isNearTo(s)
+                        this.creep.pos.isNearTo(s)
                 );
                 if (isNear) {
-                    const openPositions = this.pos.getOpenPositions();
+                    const openPositions = this.creep.pos.getOpenPositions();
                     if (openPositions?.length) {
-                        this.moveTo(openPositions[0]);
+                        this.creep.moveTo(openPositions[0]);
                     }
                 }
             }
@@ -189,11 +197,12 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 
     upgrade() {
-        if (this.room.controller && this.room.controller.my) {
+        if (this.creep.room.controller && this.creep.room.controller.my) {
             if (
-                this.upgradeController(this.room.controller) == ERR_NOT_IN_RANGE
+                this.creep.upgradeController(this.creep.room.controller) ==
+                ERR_NOT_IN_RANGE
             ) {
-                this.moveTo(this.room.controller, {
+                this.creep.moveTo(this.creep.room.controller, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
@@ -203,21 +212,23 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 
     repairStructures() {
-        const damagedStructures = this.room.memory.damagedStructures.map(
+        const damagedStructures = this.creep.room.memory.damagedStructures.map(
             (ds_id: Id<Structure>) => Game.getObjectById(ds_id)
         );
-        const towers = this.room.find(FIND_MY_STRUCTURES, {
+        const towers = this.creep.room.find(FIND_MY_STRUCTURES, {
             filter: { structureType: STRUCTURE_TOWER },
         });
 
         if (damagedStructures.length && !towers.length) {
-            const selectedDamagedStructure = this.pos.findClosestByPath(
+            const selectedDamagedStructure = this.creep.pos.findClosestByPath(
                 damagedStructures
                     .sort((a, b) => a.hits - b.hits)
                     .filter((st, non, arr) => st.hits <= arr[0].hits * 1.3)
             );
-            if (this.repair(selectedDamagedStructure) == ERR_NOT_IN_RANGE) {
-                this.moveTo(selectedDamagedStructure, {
+            if (
+                this.creep.repair(selectedDamagedStructure) == ERR_NOT_IN_RANGE
+            ) {
+                this.creep.moveTo(selectedDamagedStructure, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
@@ -228,7 +239,7 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 
     harvestFromOtherRooms() {
-        let rooms = this.room.memory.nearRooms
+        let rooms = this.creep.room.memory.nearRooms
             .filter(
                 (roomName) =>
                     !Memory.rooms[roomName]?.owner &&
@@ -242,7 +253,7 @@ class RoleWorker extends RoleCreep implements IWorker {
                     : true
             );
         if (!rooms.length) {
-            rooms = this.room.memory.nearRooms
+            rooms = this.creep.room.memory.nearRooms
                 .reduce((acc: string[], roomName: string) => {
                     const nearRooms = Memory.rooms[roomName]?.nearRooms;
                     if (nearRooms?.length) {
@@ -266,18 +277,20 @@ class RoleWorker extends RoleCreep implements IWorker {
         }
 
         if (rooms.length) {
-            const routes = Game.map.findRoute(this.room.name, rooms[0]);
+            const routes = Game.map.findRoute(this.creep.room.name, rooms[0]);
 
-            const closestRoute = this.pos.findClosestByRange(routes[0]?.exit);
+            const closestRoute = this.creep.pos.findClosestByRange(
+                routes[0]?.exit
+            );
             if (closestRoute) {
-                this.moveTo(closestRoute);
+                this.creep.moveTo(closestRoute);
             }
         }
     }
 
     findStorages() {
         const storages: [StructureStorage | StructureContainer] =
-            this.room.find(FIND_STRUCTURES, {
+            this.creep.room.find(FIND_STRUCTURES, {
                 filter: (structure) =>
                     structure.structureType === STRUCTURE_CONTAINER ||
                     structure.structureType === STRUCTURE_STORAGE,
@@ -292,12 +305,12 @@ class RoleWorker extends RoleCreep implements IWorker {
     help() {
         let roomsToHelp = [];
         let routeToRoomsToHelp = null;
-        const toHelpRoleName = `${this.roleName}s`;
+        const toHelpRoleName = `${WorkerController.roleName}s`;
         if (
             Memory.powerBanks.length &&
-            this.memory.role === "harvester" &&
+            this.creep.memory.role === "harvester" &&
             Memory.powerHuntingGroup?.length >= 3 &&
-            Memory.powerHuntingGroup?.includes(this.name)
+            Memory.powerHuntingGroup?.includes(this.creep.name)
         ) {
             const roomsWithPower = Memory.powerBanks.filter(
                 (name) => Game.rooms[name]
@@ -305,35 +318,35 @@ class RoleWorker extends RoleCreep implements IWorker {
 
             if (roomsWithPower.length) {
                 const route = Game.map.findRoute(
-                    this.room.name,
+                    this.creep.room.name,
                     roomsWithPower[0]
                 );
-                const routeToRoomsWithPower = this.pos.findClosestByRange(
+                const routeToRoomsWithPower = this.creep.pos.findClosestByRange(
                     route[0].exit
                 );
-                this.moveTo(routeToRoomsWithPower);
+                this.creep.moveTo(routeToRoomsWithPower);
             }
             return true;
         } else {
             if (Memory.needCreeps[toHelpRoleName]?.length) {
                 roomsToHelp = Memory.needCreeps[toHelpRoleName].filter((name) =>
                     Object.values(
-                        Game.map.describeExits(this?.room.name) || []
+                        Game.map.describeExits(this.creep.room.name) || []
                     ).includes(name)
                 );
 
                 if (roomsToHelp.length) {
                     const route = Game.map.findRoute(
-                        this?.room.name,
+                        this?.creep.room.name,
                         roomsToHelp[0]
                     );
-                    routeToRoomsToHelp = this.pos.findClosestByRange(
+                    routeToRoomsToHelp = this.creep.pos.findClosestByRange(
                         route[0].exit
                     );
                 }
 
                 if (routeToRoomsToHelp) {
-                    this.moveTo(routeToRoomsToHelp, {
+                    this.creep.moveTo(routeToRoomsToHelp, {
                         visualizePathStyle: { stroke: "#ffffff" },
                     });
                     return true;
@@ -347,25 +360,25 @@ class RoleWorker extends RoleCreep implements IWorker {
     harvestMinerals() {
         let storedMineral = null;
         storedMineral = <Mineral | null>(
-            Game.getObjectById(this.memory.mineralId)
+            Game.getObjectById(this.creep.memory.mineralId)
         );
 
         if (
             !storedMineral ||
             (!storedMineral.pos.getOpenPositions().length &&
-                !this.pos.isNearTo(storedMineral)) ||
-            storedMineral.room.name !== this.room.name ||
+                !this.creep.pos.isNearTo(storedMineral)) ||
+            storedMineral.room.name !== this.creep.room.name ||
             storedMineral.mineralAmount === 0
         ) {
-            delete this.memory.mineralId;
-            storedMineral = this.findMineralSource();
+            delete this.creep.memory.mineralId;
+            storedMineral = this.creep.findMineralSource();
         }
 
         if (storedMineral) {
-            if (this.pos.isNearTo(storedMineral)) {
-                this.harvest(storedMineral);
+            if (this.creep.pos.isNearTo(storedMineral)) {
+                this.creep.harvest(storedMineral);
             } else {
-                this.moveTo(storedMineral, {
+                this.creep.moveTo(storedMineral, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
@@ -373,7 +386,7 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 
     findMineralSource() {
-        const sources: Mineral[] = this.room.find(FIND_MINERALS);
+        const sources: Mineral[] = this.creep.room.find(FIND_MINERALS);
 
         if (sources.length) {
             const source = Object.values(sources).find(
@@ -382,7 +395,7 @@ class RoleWorker extends RoleCreep implements IWorker {
             );
 
             if (source) {
-                this.memory.mineralId = source.id;
+                this.creep.memory.mineralId = source.id;
                 return source;
             }
         }
@@ -390,4 +403,4 @@ class RoleWorker extends RoleCreep implements IWorker {
     }
 }
 
-export { RoleWorker };
+export { WorkerController };

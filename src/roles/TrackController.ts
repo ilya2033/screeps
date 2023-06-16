@@ -1,13 +1,15 @@
-import { RoleWorker } from "./RoleWorker";
+import { WorkerController } from "./WorkerController";
 import { ITrack } from "../types/Track";
 import conf from "../settings";
 
-class RoleTrack extends RoleWorker implements ITrack {
-    roleName = "track";
-    basicParts = <BodyPartConstant[]>[CARRY, CARRY, MOVE];
+class TrackController extends WorkerController {
+    creep: ITrack;
+
+    static roleName = "track";
+    static basicParts = <BodyPartConstant[]>[CARRY, CARRY, MOVE];
 
     runLab() {
-        const labs = this.room.find(FIND_STRUCTURES, {
+        const labs = this.creep.room.find(FIND_STRUCTURES, {
             filter: (st: Structure) => st.structureType === STRUCTURE_LAB,
         });
         const labsWithFreeStore = labs.filter((lab: StructureLab) =>
@@ -17,11 +19,11 @@ class RoleTrack extends RoleWorker implements ITrack {
             return false;
         }
 
-        if (!this.room.storage) {
+        if (!this.creep.room.storage) {
             return false;
         }
 
-        let storageEntries = Object.entries(this.room.storage.store);
+        let storageEntries = Object.entries(this.creep.room.storage.store);
 
         if (!storageEntries.length) {
             return false;
@@ -41,25 +43,29 @@ class RoleTrack extends RoleWorker implements ITrack {
             resource: storageEntries[0][1],
         };
 
-        const selectedTarget = this.pos.findClosestByPath(labsWithFreeStore);
+        const selectedTarget =
+            this.creep.pos.findClosestByPath(labsWithFreeStore);
 
         if (selectedResource.key === RESOURCE_ENERGY) {
             return false;
         }
 
-        if (this.store.getFreeCapacity() > 0) {
-            if (this.pos.isNearTo(this.room.storage)) {
-                this.withdraw(this.room.storage, selectedResource.key);
+        if (this.creep.store.getFreeCapacity() > 0) {
+            if (this.creep.pos.isNearTo(this.creep.room.storage)) {
+                this.creep.withdraw(
+                    this.creep.room.storage,
+                    selectedResource.key
+                );
             } else {
-                this.moveTo(this.room.storage, {
+                this.creep.moveTo(this.creep.room.storage, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
         } else {
-            if (this.pos.isNearTo(selectedTarget)) {
-                this.transfer(selectedTarget, selectedResource.key);
+            if (this.creep.pos.isNearTo(selectedTarget)) {
+                this.creep.transfer(selectedTarget, selectedResource.key);
             } else {
-                this.moveTo(selectedTarget, {
+                this.creep.moveTo(selectedTarget, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
@@ -71,13 +77,16 @@ class RoleTrack extends RoleWorker implements ITrack {
         let targets = [];
         let storedSource = null;
 
-        const closestStorage = this.pos.findClosestByPath(this.findStorages(), {
-            filter: (st) => st.store[RESOURCE_ENERGY] > 0,
-        });
+        const closestStorage = this.creep.pos.findClosestByPath(
+            this.creep.findStorages(),
+            {
+                filter: (st) => st.store[RESOURCE_ENERGY] > 0,
+            }
+        );
 
         const closestLink =
-            this.memory.role !== "track" &&
-            this.pos.findClosestByPath(FIND_STRUCTURES, {
+            this.creep.memory.role !== "track" &&
+            this.creep.pos.findClosestByPath(FIND_STRUCTURES, {
                 filter: (st) =>
                     st.structureType === STRUCTURE_LINK &&
                     st.store[RESOURCE_ENERGY] > 0,
@@ -94,20 +103,20 @@ class RoleTrack extends RoleWorker implements ITrack {
             targets[targets.length] = storedSource;
         }
 
-        const target = this.pos.findClosestByPath(targets);
+        const target = this.creep.pos.findClosestByPath(targets);
 
         if (target) {
-            if (this.pos.isNearTo(target)) {
+            if (this.creep.pos.isNearTo(target)) {
                 if (
-                    this.withdraw(target, RESOURCE_ENERGY) ===
+                    this.creep.withdraw(target, RESOURCE_ENERGY) ===
                     ERR_INVALID_TARGET
                 ) {
-                    if (this.pickup(target) === ERR_INVALID_TARGET) {
-                        this.harvest(target);
+                    if (this.creep.pickup(target) === ERR_INVALID_TARGET) {
+                        this.creep.harvest(target);
                     }
                 }
             } else {
-                this.moveTo(target, {
+                this.creep.moveTo(target, {
                     visualizePathStyle: { stroke: "#ffaa00" },
                 });
             }
@@ -117,16 +126,16 @@ class RoleTrack extends RoleWorker implements ITrack {
     }
 
     runStorage() {
-        if (!this.room.terminal) {
+        if (!this.creep.room.terminal) {
             return false;
         }
-        if (!this.room.storage) {
+        if (!this.creep.room.storage) {
             return false;
         }
-        if (this.store.energy > 0) {
+        if (this.creep.store.energy > 0) {
             return false;
         }
-        let terminalEntries = Object.entries(this.room.terminal.store);
+        let terminalEntries = Object.entries(this.creep.room.terminal.store);
 
         if (!terminalEntries.length) {
             return false;
@@ -148,25 +157,31 @@ class RoleTrack extends RoleWorker implements ITrack {
             return false;
         }
         if (
-            this.room.storage?.store[selectedResource.key] > 20000 &&
+            this.creep.room.storage?.store[selectedResource.key] > 20000 &&
             selectedResource.resource < 20000
         ) {
             return false;
         }
 
-        if (this.store.getFreeCapacity() > 0) {
-            if (this.pos.isNearTo(this.room.terminal)) {
-                this.withdraw(this.room.terminal, selectedResource.key);
+        if (this.creep.store.getFreeCapacity() > 0) {
+            if (this.creep.pos.isNearTo(this.creep.room.terminal)) {
+                this.creep.withdraw(
+                    this.creep.room.terminal,
+                    selectedResource.key
+                );
             } else {
-                this.moveTo(this.room.terminal, {
+                this.creep.moveTo(this.creep.room.terminal, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
         } else {
-            if (this.pos.isNearTo(this.room.storage)) {
-                this.transfer(this.room.storage, selectedResource.key);
+            if (this.creep.pos.isNearTo(this.creep.room.storage)) {
+                this.creep.transfer(
+                    this.creep.room.storage,
+                    selectedResource.key
+                );
             } else {
-                this.moveTo(this.room.storage, {
+                this.creep.moveTo(this.creep.room.storage, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
@@ -174,14 +189,14 @@ class RoleTrack extends RoleWorker implements ITrack {
         return true;
     }
     runTerminal() {
-        if (!this.room.terminal) {
+        if (!this.creep.room.terminal) {
             return false;
         }
-        if (!this.room.storage) {
+        if (!this.creep.room.storage) {
             return false;
         }
 
-        let storageEntries = Object.entries(this.room.storage.store);
+        let storageEntries = Object.entries(this.creep.room.storage.store);
 
         if (!storageEntries.length) {
             return false;
@@ -207,23 +222,29 @@ class RoleTrack extends RoleWorker implements ITrack {
             return false;
         }
 
-        if (this.room.terminal?.store[selectedResource.key] > 10000) {
+        if (this.creep.room.terminal?.store[selectedResource.key] > 10000) {
             return false;
         }
 
-        if (this.store.getFreeCapacity() > 0) {
-            if (this.pos.isNearTo(this.room.storage)) {
-                this.withdraw(this.room.storage, selectedResource.key);
+        if (this.creep.store.getFreeCapacity() > 0) {
+            if (this.creep.pos.isNearTo(this.creep.room.storage)) {
+                this.creep.withdraw(
+                    this.creep.room.storage,
+                    selectedResource.key
+                );
             } else {
-                this.moveTo(this.room.storage, {
+                this.creep.moveTo(this.creep.room.storage, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
         } else {
-            if (this.pos.isNearTo(this.room.terminal)) {
-                this.transfer(this.room.terminal, selectedResource.key);
+            if (this.creep.pos.isNearTo(this.creep.room.terminal)) {
+                this.creep.transfer(
+                    this.creep.room.terminal,
+                    selectedResource.key
+                );
             } else {
-                this.moveTo(this.room.terminal, {
+                this.creep.moveTo(this.creep.room.terminal, {
                     visualizePathStyle: { stroke: "#ffffff" },
                 });
             }
@@ -233,7 +254,7 @@ class RoleTrack extends RoleWorker implements ITrack {
 
     checkOtherResources() {
         const otherResources: ResourceConstant[] = Object.keys(
-            this.store
+            this.creep.store
         ).filter((res) => res !== RESOURCE_ENERGY) as ResourceConstant[];
         if (!otherResources.length) {
             return;
@@ -242,29 +263,30 @@ class RoleTrack extends RoleWorker implements ITrack {
         const resourceToTransfer = otherResources[0];
         let selectedTarget = null;
 
-        if (this.room.storage) {
-            selectedTarget = this.room.storage;
+        if (this.creep.room.storage) {
+            selectedTarget = this.creep.room.storage;
         }
         if (!selectedTarget) {
             return false;
         }
 
-        if (this.pos.isNearTo(selectedTarget)) {
-            this.transfer(
+        if (this.creep.pos.isNearTo(selectedTarget)) {
+            this.creep.transfer(
                 selectedTarget,
                 resourceToTransfer,
-                this.store[resourceToTransfer]
+                this.creep.store[resourceToTransfer]
             );
         } else {
-            this.moveTo(selectedTarget, {
+            this.creep.moveTo(selectedTarget, {
                 visualizePathStyle: { stroke: "#ffffff" },
             });
         }
         return 1;
     }
+
     run() {
         if (!this.runBasic()) return;
-        if (this.name === this.room.memory.terminalTrack) {
+        if (this.creep.name === this.creep.room.memory.terminalTrack) {
             if (this.runStorage()) {
                 return;
             }
@@ -275,27 +297,33 @@ class RoleTrack extends RoleWorker implements ITrack {
         if (this.checkOtherResources()) {
             return;
         }
-        // if (this.runLab(this)) {
+        // if (this.creep.runLab(this)) {
         //     return;
         // }
 
-        if (this.memory.working === undefined) {
-            this.memory.working = true;
+        if (this.creep.memory.working === undefined) {
+            this.creep.memory.working = true;
         }
 
-        if (this.memory.working && this.store[RESOURCE_ENERGY] == 0) {
-            this.memory.working = false;
-            this.say("🔄 harvest");
+        if (
+            this.creep.memory.working &&
+            this.creep.store[RESOURCE_ENERGY] == 0
+        ) {
+            this.creep.memory.working = false;
+            this.creep.say("🔄 harvest");
         }
-        if (!this.memory.working && this.store.getFreeCapacity() == 0) {
-            this.memory.working = true;
-            this.say("🚧 work");
+        if (
+            !this.creep.memory.working &&
+            this.creep.store.getFreeCapacity() == 0
+        ) {
+            this.creep.memory.working = true;
+            this.creep.say("🚧 work");
         }
-        if (!this.memory.working) {
-            this.harvestEnergy();
+        if (!this.creep.memory.working) {
+            this.creep.harvestEnergy();
         } else {
-            const targets: Structure[] = this.store[RESOURCE_ENERGY]
-                ? this.room.find(FIND_STRUCTURES, {
+            const targets: Structure[] = this.creep.store[RESOURCE_ENERGY]
+                ? this.creep.room.find(FIND_STRUCTURES, {
                       filter: (structure) => {
                           return (
                               (structure.structureType == STRUCTURE_LAB ||
@@ -316,12 +344,12 @@ class RoleTrack extends RoleWorker implements ITrack {
                 : [];
 
             const selectedTarget: Structure | null =
-                this.pos.findClosestByPath(targets);
+                this.creep.pos.findClosestByPath(targets);
             if (selectedTarget) {
-                if (this.pos.isNearTo(selectedTarget)) {
-                    this.transfer(selectedTarget, RESOURCE_ENERGY);
+                if (this.creep.pos.isNearTo(selectedTarget)) {
+                    this.creep.transfer(selectedTarget, RESOURCE_ENERGY);
                 } else {
-                    this.moveTo(selectedTarget, {
+                    this.creep.moveTo(selectedTarget, {
                         visualizePathStyle: { stroke: "#ffffff" },
                     });
                 }
@@ -330,4 +358,4 @@ class RoleTrack extends RoleWorker implements ITrack {
     }
 }
 
-export { RoleTrack };
+export { TrackController };

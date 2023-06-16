@@ -34,7 +34,7 @@ gulp.task("screeps", async function () {
 });
 
 gulp.task("clean", function () {
-    return gulp.src("./dist", { read: false,allowEmpty:true }).pipe(clean());
+    return gulp.src("./dist", { read: false, allowEmpty: true }).pipe(clean());
 });
 
 exports.default = gulp.series("clean", "flatten-folders", "screeps");

@@ -1,10 +1,12 @@
 import { ISolder } from "../types/Solder";
-import { RoleCreep } from "./RoleCreep";
+import { CreepController } from "./CreepController";
 
-class RoleSolder extends RoleCreep implements ISolder {
-    roleName = "solder";
-    defaultSetupT1 = <BodyPartConstant[]>[ATTACK, TOUGH, MOVE];
-    defaultSetupT2 = <BodyPartConstant[]>[
+class SolderController extends CreepController {
+    creep: ISolder;
+
+    static roleName = "solder";
+    static defaultSetupT1 = <BodyPartConstant[]>[ATTACK, TOUGH, MOVE];
+    static defaultSetupT2 = <BodyPartConstant[]>[
         ATTACK,
         ATTACK,
         TOUGH,
@@ -14,7 +16,7 @@ class RoleSolder extends RoleCreep implements ISolder {
         MOVE,
         MOVE,
     ];
-    defaultSetupT3 = <BodyPartConstant[]>[
+    static defaultSetupT3 = <BodyPartConstant[]>[
         ATTACK,
         ATTACK,
         ATTACK,
@@ -36,19 +38,21 @@ class RoleSolder extends RoleCreep implements ISolder {
         if (Memory.needCreeps.solders?.length) {
             roomsToHelp = Memory.needCreeps.solders.filter((name) =>
                 Object.values(
-                    Game.map.describeExits(this.room.name) || []
+                    Game.map.describeExits(this.creep.room.name) || []
                 ).includes(name)
             );
 
             if (roomsToHelp.length) {
                 const route = Game.map.findRoute(
-                    this.room.name,
+                    this.creep.room.name,
                     roomsToHelp[0]
                 );
-                routeToRoomsToHelp = this.pos.findClosestByRange(route[0].exit);
+                routeToRoomsToHelp = this.creep.pos.findClosestByRange(
+                    route[0].exit
+                );
             }
             if (routeToRoomsToHelp) {
-                this.moveTo(routeToRoomsToHelp);
+                this.creep.moveTo(routeToRoomsToHelp);
                 return true;
             }
         }
@@ -57,4 +61,4 @@ class RoleSolder extends RoleCreep implements ISolder {
     }
 }
 
-export { RoleSolder };
+export { SolderController };

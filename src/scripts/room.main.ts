@@ -1,31 +1,23 @@
-import RoleHarvester from "../roles/RoleHarvester";
-import RoleWarrior from "../roles/RoleWarrior";
-import RoleArcher from "../roles/RoleArcher";
-import RoleHealer from "../roles/RoleHealer";
-import RoleBuilder from "../roles/RoleBuilder";
+import { HarvesterController } from "../roles/HarvesterController";
+import { WarriorController } from "../roles/WarriorController";
+import { ArcherController } from "../roles/ArcherController";
+import { HealerController } from "../roles/HealerController";
+import { BuilderController } from "../roles/BuilderController";
+import { UpgraderController } from "../roles/UpgraderController";
+import { TowerController } from "../roles/TowerController";
+import { ClaimerController } from "../roles/ClaimerController";
+import { TrackController } from "../roles/TrackController";
+import { ExcavatorController } from "../roles/ExcavatorController";
 
-import { IArcher } from "../types/Archer";
-import { IWarrior } from "../types/Warrior";
-import { IUpgrader } from "../types/Upgrader";
-import { IBuilder } from "../types/Builder";
-import { IHarvester } from "../types/Harvester";
-
-import RoleUpgrader from "../roles/RoleUpgrader";
-import RoleTower from "../roles/RoleTower";
-import { IHealer } from "../types/Healer";
-import conf from "../settings";
-import RoleClaimer from "../roles/RoleClaimer";
-import RoleTrack from "../roles/RoleTrack";
-
-import RoleExcavator from "../roles/RoleExcavator";
-import { checkBodyCostValidity } from "../helpers/checkBodyCostValidity";
-import { terminalScript } from "./terminal.room";
 import { ICreep } from "../types/Creep";
+
+import { terminalScript } from "./terminal.room";
 import { checkNearRoomsScript } from "./checkNearRooms.rooms";
 import { roadScript } from "./room.roads";
 import { attackTimerScript } from "./attackTimer.room";
 import { recycleCreepsScript } from "./recycleCreeps.room";
 import { labScript } from "./lab.room";
+import conf from "../settings";
 
 const roomScript = function () {
     Object.values(Game.rooms).forEach((room) => {
@@ -145,50 +137,40 @@ const roomScript = function () {
             }
         }
 
-        const harvesters: IHarvester[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "harvester"
-        );
-        const builders: IBuilder[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "builder"
-        );
-        const upgraders: IUpgrader[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "upgrader"
-        );
-        const warriors: IWarrior[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "warrior"
-        );
-
-        const archers: IArcher[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "archer"
-        );
-
-        const healers: IHealer[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "healer"
-        );
-
-        const claimers: IHealer[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "claimer"
-        );
-
-        const tracks: IHealer[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "track"
-        );
-
-        const excavators: IHealer[] = Object.values(creeps).filter(
-            (creep) => creep.memory.role === "excavator"
-        );
+        const harvesterControllers: HarvesterController[] =
+            HarvesterController.createFromCreeps(creeps);
+        const builderControllers: BuilderController[] =
+            BuilderController.createFromCreeps(creeps);
+        const upgraderControllers: UpgraderController[] =
+            UpgraderController.createFromCreeps(creeps);
+        const warriorControllers: WarriorController[] =
+            WarriorController.createFromCreeps(creeps);
+        const archerControllers: ArcherController[] =
+            ArcherController.createFromCreeps(creeps);
+        const healerControllers: HealerController[] =
+            HealerController.createFromCreeps(creeps);
+        const claimerControllers: ClaimerController[] =
+            ClaimerController.createFromCreeps(creeps);
+        const trackControllers: TrackController[] =
+            TrackController.createFromCreeps(creeps);
+        const excavatorControllers: ExcavatorController[] =
+            ExcavatorController.createFromCreeps(creeps);
 
         let towers = [];
 
         room.memory.controlUpgrader =
-            room.controller?.pos.findClosestByPath(upgraders)?.name || null;
+            room.controller?.pos.findClosestByPath(
+                upgraderControllers.map((controller) => controller.creep)
+            )?.name || null;
 
         if (
             room.terminal &&
             (!room.memory.terminalTrack || !creeps[room.memory.terminalTrack])
         ) {
             room.memory.terminalTrack =
-                room.controller?.pos.findClosestByPath(tracks)?.name || null;
+                room.controller?.pos.findClosestByPath(
+                    trackControllers.map((controller) => controller.creep)
+                )?.name || null;
         }
 
         if (room.memory.damagedStructures?.length || attacked) {
@@ -212,7 +194,7 @@ const roomScript = function () {
             room.controller &&
             (!room.controller?.owner || room.controller?.my)
         ) {
-            if (builders.length < 2) {
+            if (builderControllers.length < 2) {
                 if (!Memory.needCreeps.builders.includes(room.name)) {
                     Memory.needCreeps.builders = [
                         ...(Memory.needCreeps.builders || []),
@@ -232,7 +214,7 @@ const roomScript = function () {
 
         if (room.controller?.my) {
             if (!room.find(FIND_MY_SPAWNS).length) {
-                if (!upgraders.length) {
+                if (!upgraderControllers.length) {
                     if (!Memory.needCreeps.upgraders.includes(room.name)) {
                         Memory.needCreeps.upgraders = [
                             ...(Memory.needCreeps.upgraders || []),
@@ -254,7 +236,10 @@ const roomScript = function () {
 
             if (
                 attacked &&
-                warriors.length + healers.length + archers.length < 3
+                warriorControllers.length +
+                    healerControllers.length +
+                    archerControllers.length <
+                    3
             ) {
                 if (!Memory.needCreeps.solders.includes(room.name)) {
                     Memory.needCreeps.solders = Memory.needCreeps.solders = [
@@ -268,19 +253,17 @@ const roomScript = function () {
                 );
             }
         }
-        if (towers.length) {
-            towers.forEach((tower) => RoleTower.run(tower));
-        }
 
-        harvesters.forEach((creep) => RoleHarvester.run(creep));
-        builders.forEach((creep) => RoleBuilder.run(creep));
-        upgraders.forEach((creep) => RoleUpgrader.run(creep));
-        warriors.forEach((creep) => RoleWarrior.run(creep));
-        archers.forEach((creep) => RoleArcher.run(creep));
-        healers.forEach((creep) => RoleHealer.run(creep));
-        claimers.forEach((creep) => RoleClaimer.run(creep));
-        tracks.forEach((creep) => RoleTrack.run(creep));
-        excavators.forEach((creep) => RoleExcavator.run(creep));
+        TowerController.runAll();
+        HarvesterController.runAll();
+        BuilderController.runAll();
+        UpgraderController.runAll();
+        WarriorController.runAll();
+        ArcherController.runAll();
+        HealerController.runAll();
+        ClaimerController.runAll();
+        TrackController.runAll();
+        ExcavatorController.runAll();
     });
 };
 

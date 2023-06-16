@@ -1,8 +1,6 @@
 export interface ICreep extends Creep {
-    roleName: string;
     memory: ICreepMemory;
     run: (creep: Creep, ...args: any) => void;
-    spawn: (spawn: StructureSpawn, basicParts?: BodyPartConstant[]) => void;
     findPowerBank: () => StructurePowerBank | null;
     moveToSpawnPoint: (room?: Room) => void;
     moveToDefendPoint: (room?: Room) => void;

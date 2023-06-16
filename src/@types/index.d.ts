@@ -1096,17 +1096,7 @@ declare const ConstructionSite: ConstructionSiteConstructor;
  */
 interface Creep extends RoomObject {
     readonly prototype: Creep;
-    harvestEnergy: () => boolean;
-    harvestMinerals: () => void;
-    run: (creep: Creep, ...args: any) => void;
-    findMineralSource: () => Mineral | null;
-    findPowerBank: () => StructurePowerBank | null;
-    moveToSpawnPoint: (room?: Room) => void;
-    moveToDefendPoint: (room?: Room) => void;
-    spawn: (spawn: StructureSpawn, basicParts?: Body[]) => void;
-    findStorages: (
-        resourceType?: ResourceConstant
-    ) => [StructureStorage | StructureContainer] | null;
+
     /**
      * An array describing the creep's body.
      */
