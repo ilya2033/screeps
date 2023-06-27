@@ -28,11 +28,11 @@ const roomScript = function () {
             room.memory.nearRooms = [];
         }
         attackTimerScript(room);
-        terminalScript(room);
+        // terminalScript(room);
         roadScript(room);
         checkNearRoomsScript(room);
         recycleCreepsScript(room);
-        labScript(room);
+        // labScript(room);
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const attacked = room.memory.attacked;
         const toHeal = room.find(FIND_MY_CREEPS, {

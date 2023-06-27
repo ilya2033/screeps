@@ -9,7 +9,7 @@ class ExcavatorController extends WorkerController {
         if (!this.runBasic()) return;
         const selectedTarget = this.creep.room.storage;
         if (this.creep.store.getFreeCapacity()) {
-            this.creep.harvestMinerals();
+            this.harvestMinerals();
         } else {
             if (selectedTarget) {
                 if (this.creep.pos.isNearTo(selectedTarget)) {
@@ -27,7 +27,7 @@ class ExcavatorController extends WorkerController {
         }
 
         if (!selectedTarget && this.creep.store.getFreeCapacity() === 0) {
-            if (!this.creep.repairStructures()) {
+            if (!this.repairStructures()) {
                 this.sleep();
             }
         }

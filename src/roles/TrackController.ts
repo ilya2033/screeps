@@ -78,7 +78,7 @@ class TrackController extends WorkerController {
         let storedSource = null;
 
         const closestStorage = this.creep.pos.findClosestByPath(
-            this.creep.findStorages(),
+            this.findStorages(),
             {
                 filter: (st) => st.store[RESOURCE_ENERGY] > 0,
             }
@@ -320,7 +320,7 @@ class TrackController extends WorkerController {
             this.creep.say("🚧 work");
         }
         if (!this.creep.memory.working) {
-            this.creep.harvestEnergy();
+            this.harvestEnergy();
         } else {
             const targets: Structure[] = this.creep.store[RESOURCE_ENERGY]
                 ? this.creep.room.find(FIND_STRUCTURES, {

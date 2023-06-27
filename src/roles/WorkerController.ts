@@ -87,7 +87,7 @@ class WorkerController extends CreepController {
             storedSource.energy === 0
         ) {
             delete this.creep.memory.sourceId;
-            storedSource = this.creep.findEnergySource();
+            storedSource = this.findEnergySource();
         }
 
         const closestDroppedEnergy = this.creep.pos.findClosestByPath(
@@ -119,7 +119,7 @@ class WorkerController extends CreepController {
         }
 
         const closestStorage = this.creep.pos.findClosestByPath(
-            this.creep.findStorages(),
+            this.findStorages(),
             {
                 filter: (st) => st.store[RESOURCE_ENERGY] > 0,
             }
@@ -257,7 +257,6 @@ class WorkerController extends CreepController {
                 .reduce((acc: string[], roomName: string) => {
                     const nearRooms = Memory.rooms[roomName]?.nearRooms;
                     if (nearRooms?.length) {
-                        console.log({ acc, nearRooms });
                         return [...new Set([...acc, ...nearRooms])];
                     }
                     return acc;
@@ -371,7 +370,7 @@ class WorkerController extends CreepController {
             storedMineral.mineralAmount === 0
         ) {
             delete this.creep.memory.mineralId;
-            storedMineral = this.creep.findMineralSource();
+            storedMineral = this.findMineralSource();
         }
 
         if (storedMineral) {

@@ -21,7 +21,7 @@ class HarvesterController extends WorkerController {
             storedSource.energy === 0
         ) {
             delete this.creep.memory.sourceId;
-            storedSource = this.creep.findEnergySource();
+            storedSource = this.findEnergySource();
         }
 
         const closestDroppedEnergy = this.creep.pos.findClosestByPath(
@@ -104,8 +104,8 @@ class HarvesterController extends WorkerController {
         ).length;
 
         if (this.creep.store.getFreeCapacity() && !checkOtherResources) {
-            if (!this.creep.harvestEnergy()) {
-                this.creep.harvestFromOtherRooms();
+            if (!this.harvestEnergy()) {
+                this.harvestFromOtherRooms();
                 return;
             }
         } else {
@@ -169,7 +169,7 @@ class HarvesterController extends WorkerController {
             }
 
             if (!selectedTarget && this.creep.store.getFreeCapacity() === 0) {
-                if (!this.creep.repairStructures()) {
+                if (!this.repairStructures()) {
                     this.sleep();
                 }
             }

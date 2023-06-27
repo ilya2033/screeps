@@ -26,7 +26,7 @@ class BuilderController extends WorkerController {
         if (this.creep.memory.working) {
             let buildTargets = this.creep.room.find(FIND_CONSTRUCTION_SITES);
 
-            if (!this.creep.help()) {
+            if (!this.help()) {
                 if (buildTargets.length) {
                     if (this.creep.build(buildTargets[0]) == ERR_NOT_IN_RANGE) {
                         this.creep.moveTo(buildTargets[0], {

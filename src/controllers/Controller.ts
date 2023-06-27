@@ -1,11 +1,11 @@
-abstract class Controller {
+class Controller {
     static runAll<T extends Controller>(...args: any[]) {
         this.getAllControllers().forEach((controller: T) =>
             controller.run(...args)
         );
     }
 
-    static getAllControllers<T>(): T[] {
+    static getAllControllers() {
         return [];
     }
 

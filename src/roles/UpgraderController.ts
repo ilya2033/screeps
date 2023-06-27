@@ -28,11 +28,11 @@ class UpgraderController extends WorkerController {
                 this.creep.room.controller.ticksToDowngrade > 9000 &&
                 this.creep.name !== this.creep.room.memory.controlUpgrader
             ) {
-                if (this.creep.help()) {
+                if (this.help()) {
                     return;
                 }
                 if (this.creep.room.memory.damagedStructures.length) {
-                    this.creep.repairStructures();
+                    this.repairStructures();
                 } else {
                     this.upgrade();
                 }
@@ -40,7 +40,7 @@ class UpgraderController extends WorkerController {
                 this.upgrade();
             }
         } else {
-            this.creep.harvestEnergy();
+            this.harvestEnergy();
         }
     }
 }

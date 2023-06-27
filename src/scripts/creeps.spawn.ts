@@ -34,7 +34,7 @@ const creepsSpawnScript = function () {
         }
     }
 
-    Object.values(Game.rooms).forEach((room) => {
+    Object.values(Game.rooms).forEach((room: Room) => {
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const spawns = room.find(FIND_MY_SPAWNS);
         const extractors = room.find(FIND_STRUCTURES, {
@@ -251,14 +251,14 @@ const creepsSpawnScript = function () {
                 }
                 break;
 
-            case excavatorsCondition:
-                for (const spawn of Object.values(spawns)) {
-                    if (spawn.isActive() && !spawn.spawning) {
-                        ExcavatorController.spawn(spawn);
-                        break;
-                    }
-                }
-                break;
+            // case excavatorsCondition:
+            //     for (const spawn of Object.values(spawns)) {
+            //         if (spawn.isActive() && !spawn.spawning) {
+            //             ExcavatorController.spawn(spawn);
+            //             break;
+            //         }
+            //     }
+            //     break;
 
             // case scoutsCondition:
             //     for (const spawn of Object.values(spawns)) {

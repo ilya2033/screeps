@@ -1,5 +1,5 @@
 import { ICreep } from "../types/Creep";
-import { Controller } from "./Controller";
+import { Controller } from "../controllers/Controller";
 
 class CreepController extends Controller {
     creep: ICreep;
@@ -107,6 +107,12 @@ class CreepController extends Controller {
         };
     }
 
+    static getAllControllers<T extends CreepController>() {
+        return Object.values(Game.creeps)
+            .filter((creep: ICreep) => creep.memory.role === this.roleName)
+            .map((creep: ICreep) => new this(creep)) as T[];
+    }
+
     static spawn(spawn: StructureSpawn) {
         let setup = this.defaultSetupT1;
 
@@ -149,6 +155,10 @@ class CreepController extends Controller {
             return;
         }
 
+        if (setup.length > 50) {
+            setup = setup.slice(0, 50);
+        }
+
         spawn.spawnCreep(
             setup,
             `${this.roleName.charAt(0).toUpperCase() + this.roleName.slice(1)}${
@@ -172,7 +182,7 @@ class CreepController extends Controller {
     }
 
     sleep() {
-        if (this.creep.help()) {
+        if (this.help()) {
             return;
         }
         this.creep.memory.recycle = true;
