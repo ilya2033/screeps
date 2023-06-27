@@ -8,4 +8,5 @@ export interface ICreepMemory extends CreepMemory {
     spawnRoom: string;
     recycle: boolean;
     boost: boolean;
+    powerBankId: string;
 }

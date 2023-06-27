@@ -1,40 +1,30 @@
-import RoleArcher from "../roles/RoleArcher";
-import RoleHarvester from "../roles/RoleHarvester";
-import RoleHealer from "../roles/RoleHealer";
-import RoleUpgrader from "../roles/RoleUpgrader";
-import RoleWarrior from "../roles/RoleWarrior";
-
-import RoleBuilder from "../roles/RoleBuilder";
+import { ArcherController } from "../roles/ArcherController";
+import { HarvesterController } from "../roles/HarvesterController";
+import { HealerController } from "../roles/HealerController";
+import { UpgraderController } from "../roles/UpgraderController";
+import { WarriorController } from "../roles/WarriorController";
+import { ClaimerController } from "../roles/ClaimerController";
+import { ScoutController } from "../roles/ScoutController";
+import { BuilderController } from "../roles/BuilderController";
+import { TrackController } from "../roles/TrackController";
+import { ExcavatorController } from "../roles/ExcavatorController";
 
 import settings from "../settings";
-import { IArcher } from "../types/Archer";
-import { IBuilder } from "../types/Builder";
-import { IHarvester } from "../types/Harvester";
-import { IHealer } from "../types/Healer";
-import { IUpgrader } from "../types/Upgrader";
-import { IWarrior } from "../types/Warrior";
-import { IClaimer } from "../types/Claimer";
-import RoleClaimer from "../roles/RoleClaimer";
-import { ITrack } from "../types/Track";
-import RoleTrack from "../roles/RoleTrack";
 import conf from "../settings";
-import { IScout } from "../types/Scout";
-import RoleScout from "../roles/RoleScout";
-import { IExcavator } from "../types/Excavator";
-import RoleExcavator from "../roles/RoleExcavator";
+
 import { ICreep } from "../types/Creep";
 
-interface MyCreeps {
-    harvesters?: IHarvester[];
-    builders?: IBuilder[];
-    upgraders?: IUpgrader[];
-    warriors?: IWarrior[];
-    archers?: IArcher[];
-    healers?: IHealer[];
-    claimers?: IClaimer[];
-    tracks?: ITrack[];
-    scouts?: IScout[];
-    excavators?: IExcavator[];
+interface MyControllers {
+    harvesters?: HarvesterController[];
+    builders?: BuilderController[];
+    upgraders?: UpgraderController[];
+    warriors?: WarriorController[];
+    archers?: ArcherController[];
+    healers?: HealerController[];
+    claimers?: ClaimerController[];
+    tracks?: TrackController[];
+    scouts?: ScoutController[];
+    excavators?: ExcavatorController[];
 }
 
 const creepsSpawnScript = function () {
@@ -44,7 +34,7 @@ const creepsSpawnScript = function () {
         }
     }
 
-    Object.values(Game.rooms).forEach((room) => {
+    Object.values(Game.rooms).forEach((room: Room) => {
         const creeps: ICreep[] = room.find(FIND_MY_CREEPS);
         const spawns = room.find(FIND_MY_SPAWNS);
         const extractors = room.find(FIND_STRUCTURES, {
@@ -74,118 +64,74 @@ const creepsSpawnScript = function () {
 
         const safeMode = room.controller?.safeMode;
 
-        let myCreeps: MyCreeps = {};
+        let myControllers: MyControllers = {};
 
-        myCreeps.harvesters = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "harvester"
-        );
-        myCreeps.builders = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "builder"
-        );
-        myCreeps.upgraders = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "upgrader"
-        );
-        myCreeps.warriors = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "warrior"
-        );
-        myCreeps.archers = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "archer"
-        );
-
-        myCreeps.healers = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "healer"
-        );
-
-        myCreeps.claimers = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "claimer"
-        );
-
-        myCreeps.tracks = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "track"
-        );
-        myCreeps.tracks = Object.values(creeps).filter(
-            (creep) =>
-                creep.memory.spawnRoom === room.name &&
-                creep.memory.role === "track"
-        );
-        myCreeps.scouts = <ICreep[]>(
-            Object.values(Game.creeps).filter(
-                (creep: ICreep) =>
-                    creep.memory.spawnRoom === room.name &&
-                    creep.memory.role === "scout"
-            )
-        );
-        myCreeps.excavators = <ICreep[]>(
-            Object.values(Game.creeps).filter(
-                (creep: ICreep) =>
-                    creep.memory.spawnRoom === room.name &&
-                    creep.memory.role === "excavator"
-            )
-        );
+        myControllers.harvesters = HarvesterController.createFromCreeps(creeps);
+        myControllers.builders = BuilderController.createFromCreeps(creeps);
+        myControllers.upgraders = UpgraderController.createFromCreeps(creeps);
+        myControllers.warriors = WarriorController.createFromCreeps(creeps);
+        myControllers.archers = ArcherController.createFromCreeps(creeps);
+        myControllers.healers = HealerController.createFromCreeps(creeps);
+        myControllers.claimers = ClaimerController.createFromCreeps(creeps);
+        myControllers.tracks = TrackController.createFromCreeps(creeps);
+        myControllers.scouts = ScoutController.createFromCreeps(creeps);
+        myControllers.excavators = ExcavatorController.createFromCreeps(creeps);
 
         const creepsPerSource = Math.ceil(sourcesWalkablePlaces * 0.5);
 
         let claimersCondition =
             !!Game.flags[`${room.name}-attackPoint`] &&
-            myCreeps.claimers.length < 2;
+            myControllers.claimers.length < 2;
 
         let harvestersCondition =
-            myCreeps.harvesters.length < conf.creeps.MIN_HARVESTERS ||
-            myCreeps.harvesters.length < creepsPerSource;
+            myControllers.harvesters.length < conf.creeps.MIN_HARVESTERS ||
+            myControllers.harvesters.length < creepsPerSource;
 
         let upgradersCondition =
-            myCreeps.upgraders.length < settings.creeps.MIN_UPGRADERS ||
-            (myCreeps.upgraders.length <= creepsPerSource &&
-                myCreeps.upgraders.length <
+            myControllers.upgraders.length < settings.creeps.MIN_UPGRADERS ||
+            (myControllers.upgraders.length <= creepsPerSource &&
+                myControllers.upgraders.length <
                     (room.memory.damagedStructures?.length && !towers.length
                         ? settings.creeps.MAX_UPGRADERS
                         : 1));
 
         let excavatorsCondition =
             !attacked &&
-            myCreeps.excavators.length < extractors.length &&
-            minerals.some((mineral) => mineral.mineralAmount > 0);
+            myControllers.excavators.length < extractors.length &&
+            minerals.some(
+                (mineral) =>
+                    mineral.mineralAmount > 0 &&
+                    room.storage &&
+                    room.storage.store.getFreeCapacity() >
+                        room.storage.store.getCapacity() * 0.2
+            );
         let warriorsCondition =
-            attacked && myCreeps.warriors.length < settings.creeps.MAX_WARRIORS;
+            attacked &&
+            myControllers.warriors.length < settings.creeps.MAX_WARRIORS;
 
         let archersCondition =
-            attacked && myCreeps.archers.length < settings.creeps.MAX_ARCHERS;
+            attacked &&
+            myControllers.archers.length < settings.creeps.MAX_ARCHERS;
 
         let healersCondition =
             (attacked &&
-                myCreeps.healers.length < settings.creeps.MAX_HEALERS) ||
+                myControllers.healers.length < settings.creeps.MAX_HEALERS) ||
             toHeal.length;
 
         let tracksCondition = !!(
-            myCreeps.tracks.length < creepsPerSource &&
-            myCreeps.tracks.length < conf.creeps.MAX_TRACKS &&
+            myControllers.tracks.length < creepsPerSource &&
+            myControllers.tracks.length < conf.creeps.MAX_TRACKS &&
             storages.length
         );
 
         let buildersCondition =
             !attacked &&
             toBuild.length &&
-            myCreeps.builders.length <= creepsPerSource &&
-            myCreeps.builders.length < settings.creeps.MAX_BUILDERS;
+            myControllers.builders.length <= creepsPerSource &&
+            myControllers.builders.length < settings.creeps.MAX_BUILDERS;
 
         let scoutsCondition =
-            myCreeps.scouts.length < settings.creeps.MAX_SCOUTS;
+            myControllers.scouts.length < settings.creeps.MAX_SCOUTS;
 
         if (Memory.needCreeps.builders?.length) {
             const roomsToHelp = Memory.needCreeps.builders.filter((name) =>
@@ -194,7 +140,7 @@ const creepsSpawnScript = function () {
                 )
             );
             if (roomsToHelp.length) {
-                if (!myCreeps.builders.length) {
+                if (!myControllers.builders.length) {
                     buildersCondition = true;
                 }
             }
@@ -208,9 +154,9 @@ const creepsSpawnScript = function () {
             );
             if (roomsToHelp.length) {
                 if (
-                    myCreeps.warriors.length +
-                        myCreeps.healers.length +
-                        myCreeps.archers.length <
+                    myControllers.warriors.length +
+                        myControllers.healers.length +
+                        myControllers.archers.length <
                     3
                 ) {
                     warriorsCondition = true;
@@ -242,7 +188,7 @@ const creepsSpawnScript = function () {
             case harvestersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleHarvester.spawn(spawn);
+                        HarvesterController.spawn(spawn);
                         break;
                     }
                 }
@@ -250,7 +196,7 @@ const creepsSpawnScript = function () {
             case upgradersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleUpgrader.spawn(spawn);
+                        UpgraderController.spawn(spawn);
                         break;
                     }
                 }
@@ -258,7 +204,7 @@ const creepsSpawnScript = function () {
             case tracksCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleTrack.spawn(spawn);
+                        TrackController.spawn(spawn);
                         break;
                     }
                 }
@@ -266,7 +212,7 @@ const creepsSpawnScript = function () {
             case warriorsCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleWarrior.spawn(spawn);
+                        WarriorController.spawn(spawn);
                         break;
                     }
                 }
@@ -274,7 +220,7 @@ const creepsSpawnScript = function () {
             case archersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleArcher.spawn(spawn);
+                        ArcherController.spawn(spawn);
                         break;
                     }
                 }
@@ -283,7 +229,7 @@ const creepsSpawnScript = function () {
             case healersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleHealer.spawn(spawn);
+                        HealerController.spawn(spawn);
                         break;
                     }
                 }
@@ -291,7 +237,7 @@ const creepsSpawnScript = function () {
             case claimersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning && !safeMode) {
-                        RoleClaimer.spawn(spawn);
+                        ClaimerController.spawn(spawn);
                         break;
                     }
                 }
@@ -299,20 +245,20 @@ const creepsSpawnScript = function () {
             case buildersCondition:
                 for (const spawn of Object.values(spawns)) {
                     if (spawn.isActive() && !spawn.spawning) {
-                        RoleBuilder.spawn(spawn);
+                        BuilderController.spawn(spawn);
                         break;
                     }
                 }
                 break;
 
-            case excavatorsCondition:
-                for (const spawn of Object.values(spawns)) {
-                    if (spawn.isActive() && !spawn.spawning) {
-                        RoleExcavator.spawn(spawn);
-                        break;
-                    }
-                }
-                break;
+            // case excavatorsCondition:
+            //     for (const spawn of Object.values(spawns)) {
+            //         if (spawn.isActive() && !spawn.spawning) {
+            //             ExcavatorController.spawn(spawn);
+            //             break;
+            //         }
+            //     }
+            //     break;
 
             // case scoutsCondition:
             //     for (const spawn of Object.values(spawns)) {

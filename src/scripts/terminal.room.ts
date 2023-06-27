@@ -7,11 +7,19 @@ const terminalScript = function (room: Room) {
     if (!room.storage) {
         return;
     }
-    if (room.energyAvailable < room.energyCapacityAvailable * 0.8) {
+
+    if (
+        room.energyAvailable < room.energyCapacityAvailable * 0.8 &&
+        room.storage.store.getFreeCapacity() >
+            room.storage.store.getCapacity() * 0.2
+    ) {
         return;
     }
     const terminal: StructureTerminal = room.terminal;
     const storage: StructureStorage = room.storage;
+
+    const storageCapacity = storage.store.getCapacity();
+    const terminalCapacity = terminal.store.getCapacity();
 
     Object.keys(terminal.store).forEach((resourceName) => {
         if (resourceName === RESOURCE_ENERGY) {
@@ -20,8 +28,9 @@ const terminalScript = function (room: Room) {
 
         if (
             terminal.store[RESOURCE_ENERGY] >= 2000 &&
-            terminal.store[resourceName] >= 2000 &&
-            storage.store[resourceName] >= 10000
+            terminal.store[resourceName] >= 1000 &&
+            (terminal.store[resourceName] >= terminalCapacity * 0.05 ||
+                storage.store[resourceName] >= storageCapacity * 0.01)
         ) {
             const orders = Game.market.getAllOrders(
                 (order) =>
@@ -48,6 +57,15 @@ const terminalScript = function (room: Room) {
             }
         }
     });
+
+    if (
+        !(
+            room.storage.store.getFreeCapacity() >
+            room.storage.store.getCapacity() * 0.2
+        )
+    ) {
+        return;
+    }
 
     conf.resources.NEED_TO_BY.forEach((resourceName: ResourceConstant) => {
         if (

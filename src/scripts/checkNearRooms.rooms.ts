@@ -1,17 +1,11 @@
-import RoleScout from "../roles/RoleScout";
-import { ICreep } from "../types/Creep";
-import { IScout } from "../types/Scout";
+import { ScoutController } from "../roles/ScoutController";
 
 export const checkNearRoomsScript = (room: Room) => {
     let time = Game.time;
     let needToCheck: string[] = [];
-    const scoutes: IScout[] = <ICreep[]>(
-        Object.values(Game.creeps).filter(
-            (creep: ICreep) =>
-                creep.memory.role === "scout" &&
-                creep.memory.spawnRoom === room.name
-        )
-    );
+    const scouteControllers: ScoutController[] =
+        ScoutController.getAllControllers();
+
     if (!room.memory.nearRooms?.length) {
         const nearExists = Game.map.describeExits(room.name);
         Object.values(nearExists).forEach((roomName) => {
@@ -30,7 +24,7 @@ export const checkNearRoomsScript = (room: Room) => {
     }
 
     if (needToCheck.length) {
-        if (!scoutes?.length) {
+        if (!scouteControllers?.length) {
             const spawns = room.find(FIND_MY_SPAWNS);
             for (const spawn of Object.values(spawns)) {
                 if (spawn.isActive() && !spawn.spawning) {
@@ -39,10 +33,12 @@ export const checkNearRoomsScript = (room: Room) => {
                 }
             }
         } else {
-            scoutes.forEach((creep) => RoleScout.run(creep, needToCheck[0]));
+            scouteControllers.forEach((controller) =>
+                controller.run(needToCheck[0])
+            );
             return;
         }
     } else {
-        scoutes.forEach((creep) => RoleScout.run(creep));
+        scouteControllers.forEach((controller) => controller.run());
     }
 };
